@@ -136,7 +136,7 @@ export const Taskbar = () => {
     };
 
     // Get unique app types from open windows
-    const openAppTypes = Array.from(new Set(windows.map(w => w.appType)));
+    const openAppTypes = useMemo(() => Array.from(new Set(windows.map(w => w.appType))), [windows]);
 
     return (
         <>
