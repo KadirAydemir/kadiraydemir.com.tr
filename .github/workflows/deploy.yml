@@ -18,18 +18,18 @@ jobs:
           port: 22
           script: |
             echo "Starting deployment..."
+            # Fix "dubious ownership" error
+            git config --global --add safe.directory /var/www/kadiraydemir.com.tr
+            
             cd /var/www/kadiraydemir.com.tr
             
             echo "Pulling latest changes..."
             git pull origin main
             
             echo "Rebuilding and restarting Docker containers..."
-            # Using docker compose (v2) or docker-compose (v1) depending on availability
-            if command -v docker-compose &> /dev/null; then
-                docker-compose up -d --build
-            else
-                docker compose up -d --build
-            fi
+            echo "Rebuilding and restarting Docker containers..."
+            # Using Docker Compose v2 (Preferred)
+            docker compose up -d --build
             
             echo "Cleaning up unused images..."
             docker image prune -f
