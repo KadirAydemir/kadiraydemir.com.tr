@@ -250,125 +250,127 @@ export const MinesweeperGame = () => {
     const cellSize = difficulty === 'hard' ? 'w-5 h-5 text-xs' : 'w-7 h-7 text-sm';
 
     return (
-        <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-gray-100 to-gray-200 p-6 overflow-auto">
-            {/* Header */}
-            <div className="w-full max-w-4xl mb-4">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <Bomb className="text-red-600" size={28} />
-                        Minesweeper
-                    </h1>
-                    <select
-                        value={difficulty}
-                        onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-                        className="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-800 font-semibold cursor-pointer hover:border-ubuntu-orange transition-colors"
-                    >
-                        <option value="easy">Easy (9x9)</option>
-                        <option value="medium">Medium (16x16)</option>
-                        <option value="hard">Hard (30x16)</option>
-                    </select>
+        <div className="h-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-auto">
+            <div className="flex flex-col items-center justify-center min-h-full p-4">
+                {/* Header */}
+                <div className="w-full max-w-2xl mb-2">
+                    <div className="flex justify-between items-center mb-2">
+                        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                            <Bomb className="text-red-600" size={24} />
+                            Minesweeper
+                        </h1>
+                        <select
+                            value={difficulty}
+                            onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+                            className="px-3 py-1.5 border-2 border-gray-300 rounded-lg bg-white text-gray-800 font-semibold cursor-pointer hover:border-ubuntu-orange transition-colors text-sm"
+                        >
+                            <option value="easy">Easy (9x9)</option>
+                            <option value="medium">Medium (16x16)</option>
+                            <option value="hard">Hard (30x16)</option>
+                        </select>
+                    </div>
+
+                    {/* Stats Bar */}
+                    <div className="flex justify-between items-center bg-gray-800 text-white px-6 py-2 rounded-lg mb-2">
+                        <div className="flex items-center gap-2">
+                            <Flag className="text-ubuntu-orange" size={18} />
+                            <span className="text-lg font-mono font-bold">
+                                {config.mines - flagCount}
+                            </span>
+                        </div>
+                        <button
+                            onClick={resetGame}
+                            className="px-4 py-1.5 bg-ubuntu-orange hover:bg-orange-600 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm"
+                        >
+                            <RotateCcw size={16} />
+                            New Game
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg font-mono font-bold">
+                                {String(timer).padStart(3, '0')}
+                            </span>
+                            <span className="text-xs">sec</span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Stats Bar */}
-                <div className="flex justify-between items-center bg-gray-800 text-white px-6 py-3 rounded-lg mb-4">
-                    <div className="flex items-center gap-2">
-                        <Flag className="text-ubuntu-orange" size={20} />
-                        <span className="text-xl font-mono font-bold">
-                            {config.mines - flagCount}
-                        </span>
-                    </div>
-                    <button
-                        onClick={resetGame}
-                        className="px-4 py-2 bg-ubuntu-orange hover:bg-orange-600 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                {/* Game Grid */}
+                <div className="relative bg-white p-3 rounded-lg shadow-2xl">
+                    <div
+                        className="grid gap-[1px] bg-gray-400 border-4 border-gray-600"
+                        style={{
+                            gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`,
+                        }}
                     >
-                        <RotateCcw size={18} />
-                        New Game
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xl font-mono font-bold">
-                            {String(timer).padStart(3, '0')}
-                        </span>
-                        <span className="text-sm">sec</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Game Grid */}
-            <div className="relative bg-white p-4 rounded-lg shadow-2xl">
-                <div
-                    className="grid gap-[1px] bg-gray-400 border-4 border-gray-600"
-                    style={{
-                        gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`,
-                    }}
-                >
-                    {grid.map((row, rowIndex) =>
-                        row.map((cell, colIndex) => (
-                            <button
-                                key={`${rowIndex}-${colIndex}`}
-                                onClick={() => handleLeftClick(rowIndex, colIndex)}
-                                onContextMenu={(e) => handleRightClick(e, rowIndex, colIndex)}
-                                className={`
+                        {grid.map((row, rowIndex) =>
+                            row.map((cell, colIndex) => (
+                                <button
+                                    key={`${rowIndex}-${colIndex}`}
+                                    onClick={() => handleLeftClick(rowIndex, colIndex)}
+                                    onContextMenu={(e) => handleRightClick(e, rowIndex, colIndex)}
+                                    className={`
                                     ${cellSize}
                                     flex items-center justify-center font-bold
                                     transition-all
                                     ${cell.state === 'hidden'
-                                        ? 'bg-gray-500 hover:bg-gray-400 shadow-inner'
-                                        : cell.state === 'flagged'
-                                            ? 'bg-gray-500'
-                                            : cell.isMine
-                                                ? 'bg-red-500'
-                                                : 'bg-gray-200'
-                                    }
+                                            ? 'bg-gray-500 hover:bg-gray-400 shadow-inner'
+                                            : cell.state === 'flagged'
+                                                ? 'bg-gray-500'
+                                                : cell.isMine
+                                                    ? 'bg-red-500'
+                                                    : 'bg-gray-200'
+                                        }
                                 `}
+                                >
+                                    {cell.state === 'flagged' && (
+                                        <Flag className="text-ubuntu-orange" size={difficulty === 'hard' ? 12 : 16} />
+                                    )}
+                                    {cell.state === 'revealed' && cell.isMine && (
+                                        <Bomb className="text-white" size={difficulty === 'hard' ? 12 : 16} />
+                                    )}
+                                    {cell.state === 'revealed' && !cell.isMine && cell.neighborMines > 0 && (
+                                        <span className={NUMBER_COLORS[cell.neighborMines]}>
+                                            {cell.neighborMines}
+                                        </span>
+                                    )}
+                                </button>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Game Over Overlay */}
+                    {(gameStatus === 'won' || gameStatus === 'lost') && (
+                        <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-lg">
+                            {gameStatus === 'won' ? (
+                                <>
+                                    <Trophy className="text-yellow-400 mb-4" size={64} />
+                                    <h2 className="text-4xl font-bold text-white mb-2">You Win! 🎉</h2>
+                                    <p className="text-xl text-gray-300 mb-6">Time: {timer} seconds</p>
+                                </>
+                            ) : (
+                                <>
+                                    <Bomb className="text-red-500 mb-4" size={64} />
+                                    <h2 className="text-4xl font-bold text-white mb-2">Game Over!</h2>
+                                    <p className="text-xl text-gray-300 mb-6">Better luck next time</p>
+                                </>
+                            )}
+                            <button
+                                onClick={resetGame}
+                                className="px-6 py-3 bg-ubuntu-orange hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
                             >
-                                {cell.state === 'flagged' && (
-                                    <Flag className="text-ubuntu-orange" size={difficulty === 'hard' ? 12 : 16} />
-                                )}
-                                {cell.state === 'revealed' && cell.isMine && (
-                                    <Bomb className="text-white" size={difficulty === 'hard' ? 12 : 16} />
-                                )}
-                                {cell.state === 'revealed' && !cell.isMine && cell.neighborMines > 0 && (
-                                    <span className={NUMBER_COLORS[cell.neighborMines]}>
-                                        {cell.neighborMines}
-                                    </span>
-                                )}
+                                <RotateCcw size={20} />
+                                Play Again
                             </button>
-                        ))
+                        </div>
                     )}
                 </div>
 
-                {/* Game Over Overlay */}
-                {(gameStatus === 'won' || gameStatus === 'lost') && (
-                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-lg">
-                        {gameStatus === 'won' ? (
-                            <>
-                                <Trophy className="text-yellow-400 mb-4" size={64} />
-                                <h2 className="text-4xl font-bold text-white mb-2">You Win! 🎉</h2>
-                                <p className="text-xl text-gray-300 mb-6">Time: {timer} seconds</p>
-                            </>
-                        ) : (
-                            <>
-                                <Bomb className="text-red-500 mb-4" size={64} />
-                                <h2 className="text-4xl font-bold text-white mb-2">Game Over!</h2>
-                                <p className="text-xl text-gray-300 mb-6">Better luck next time</p>
-                            </>
-                        )}
-                        <button
-                            onClick={resetGame}
-                            className="px-6 py-3 bg-ubuntu-orange hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
-                        >
-                            <RotateCcw size={20} />
-                            Play Again
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            {/* Instructions */}
-            <div className="mt-6 text-center text-sm text-gray-600 max-w-md">
-                <p className="mb-1">🖱️ Left click to reveal cells</p>
-                <p className="mb-1">🚩 Right click to place/remove flags</p>
-                <p>💡 Numbers show how many mines are nearby</p>
+                {/* Instructions */}
+                <div className="mt-6 text-center text-sm text-gray-600 max-w-md">
+                    <p className="mb-1">🖱️ Left click to reveal cells</p>
+                    <p className="mb-1">🚩 Right click to place/remove flags</p>
+                    <p>💡 Numbers show how many mines are nearby</p>
+                </div>
             </div>
         </div>
     );

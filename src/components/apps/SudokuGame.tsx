@@ -49,8 +49,8 @@ const SudokuBoard = memo(({ grid, selectedCell, onCellSelect }: SudokuBoardProps
                             key={`${rowIndex}-${colIndex}`}
                             onClick={() => onCellSelect(rowIndex, colIndex)}
                             className={`
-                                w-16 h-16 flex items-center justify-center relative
-                                border border-gray-300 font-bold text-xl
+                                w-14 h-14 flex items-center justify-center relative
+                                border border-gray-300 font-bold text-lg
                                 transition-colors
                                 ${(colIndex + 1) % BOX_COLS === 0 && colIndex !== GRID_SIZE - 1 ? 'border-r-2 border-r-gray-800' : ''}
                                 ${(rowIndex + 1) % BOX_ROWS === 0 && rowIndex !== GRID_SIZE - 1 ? 'border-b-2 border-b-gray-800' : ''}
@@ -327,119 +327,121 @@ export const SudokuGame = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-blue-50 to-purple-50 p-6 overflow-auto">
-            {/* Header */}
-            <div className="w-full max-w-xl mb-4">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        🔢 Sudoku 6×6
-                    </h1>
-                    <select
-                        value={difficulty}
-                        onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-                        className="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-gray-800 font-semibold cursor-pointer hover:border-ubuntu-orange transition-colors"
-                    >
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                        <option value="expert">Expert</option>
-                    </select>
-                </div>
-
-                {/* Stats Bar */}
-                <div className="flex justify-between items-center bg-gray-800 text-white px-6 py-3 rounded-lg mb-4">
-                    <div className="flex items-center gap-2">
-                        <span className="text-xl font-mono font-bold">{formatTime(timer)}</span>
+        <div className="h-full bg-gradient-to-br from-blue-50 to-purple-50 overflow-auto">
+            <div className="flex flex-col items-center justify-center min-h-full p-4">
+                {/* Header */}
+                <div className="w-full max-w-lg mb-2">
+                    <div className="flex justify-between items-center mb-2">
+                        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                            🔢 Sudoku 6×6
+                        </h1>
+                        <select
+                            value={difficulty}
+                            onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+                            className="px-3 py-1.5 border-2 border-gray-300 rounded-lg bg-white text-gray-800 font-semibold cursor-pointer hover:border-ubuntu-orange transition-colors text-sm"
+                        >
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                            <option value="expert">Expert</option>
+                        </select>
                     </div>
-                    <button
-                        onClick={newGame}
-                        className="px-4 py-2 bg-ubuntu-orange hover:bg-orange-600 rounded-lg font-semibold transition-colors flex items-center gap-2"
-                    >
-                        <RotateCcw size={18} />
-                        New Game
-                    </button>
-                    <div className="flex items-center gap-2">
-                        <Lightbulb size={18} className="text-yellow-400" />
-                        <span className="text-sm">Hints: {hintsUsed}</span>
-                    </div>
-                </div>
-            </div>
 
-            {/* Game Grid */}
-            <div className="relative bg-white p-4 rounded-lg shadow-2xl mb-4">
-                <SudokuBoard
-                    grid={grid}
-                    selectedCell={selectedCell}
-                    onCellSelect={handleCellSelect}
-                />
-
-                {/* Win Overlay */}
-                {isComplete && (
-                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-lg">
-                        <Trophy className="text-yellow-400 mb-4" size={64} />
-                        <h2 className="text-4xl font-bold text-white mb-2">Congratulations! 🎉</h2>
-                        <p className="text-xl text-gray-300 mb-2">Time: {formatTime(timer)}</p>
-                        <p className="text-lg text-gray-400 mb-6">Hints used: {hintsUsed}</p>
+                    {/* Stats Bar */}
+                    <div className="flex justify-between items-center bg-gray-800 text-white px-6 py-2 rounded-lg mb-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg font-mono font-bold">{formatTime(timer)}</span>
+                        </div>
                         <button
                             onClick={newGame}
-                            className="px-6 py-3 bg-ubuntu-orange hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+                            className="px-4 py-1.5 bg-ubuntu-orange hover:bg-orange-600 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm"
                         >
-                            <RotateCcw size={20} />
-                            Play Again
+                            <RotateCcw size={16} />
+                            New Game
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <Lightbulb size={16} className="text-yellow-400" />
+                            <span className="text-sm">Hints: {hintsUsed}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Game Grid */}
+                <div className="relative bg-white p-3 rounded-lg shadow-2xl mb-2">
+                    <SudokuBoard
+                        grid={grid}
+                        selectedCell={selectedCell}
+                        onCellSelect={handleCellSelect}
+                    />
+
+                    {/* Win Overlay */}
+                    {isComplete && (
+                        <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-lg">
+                            <Trophy className="text-yellow-400 mb-4" size={64} />
+                            <h2 className="text-4xl font-bold text-white mb-2">Congratulations! 🎉</h2>
+                            <p className="text-xl text-gray-300 mb-2">Time: {formatTime(timer)}</p>
+                            <p className="text-lg text-gray-400 mb-6">Hints used: {hintsUsed}</p>
+                            <button
+                                onClick={newGame}
+                                className="px-6 py-3 bg-ubuntu-orange hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+                            >
+                                <RotateCcw size={20} />
+                                Play Again
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Controls */}
+                <div className="w-full max-w-lg">
+                    {/* Number Buttons */}
+                    <div className="grid grid-cols-6 gap-2 mb-2">
+                        {[1, 2, 3, 4, 5, 6].map(num => (
+                            <button
+                                key={num}
+                                onClick={() => handleNumberInput(num)}
+                                className="h-12 bg-gray-700 hover:bg-gray-600 text-white font-bold text-lg rounded-lg transition-colors"
+                            >
+                                {num}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-3 gap-2">
+                        <button
+                            onClick={() => setNoteMode(!noteMode)}
+                            className={`px-4 py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 text-sm ${noteMode
+                                ? 'bg-ubuntu-orange text-white'
+                                : 'bg-gray-300 hover:bg-gray-400 text-gray-800'
+                                }`}
+                        >
+                            <Edit3 size={16} />
+                            Notes {noteMode ? 'ON' : 'OFF'}
+                        </button>
+                        <button
+                            onClick={handleErase}
+                            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 text-sm"
+                        >
+                            <Eraser size={16} />
+                            Erase
+                        </button>
+                        <button
+                            onClick={handleHint}
+                            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 text-sm"
+                        >
+                            <Lightbulb size={16} />
+                            Hint
                         </button>
                     </div>
-                )}
-            </div>
-
-            {/* Controls */}
-            <div className="w-full max-w-xl">
-                {/* Number Buttons */}
-                <div className="grid grid-cols-6 gap-2 mb-3">
-                    {[1, 2, 3, 4, 5, 6].map(num => (
-                        <button
-                            key={num}
-                            onClick={() => handleNumberInput(num)}
-                            className="h-14 bg-gray-700 hover:bg-gray-600 text-white font-bold text-xl rounded-lg transition-colors"
-                        >
-                            {num}
-                        </button>
-                    ))}
                 </div>
 
-                {/* Action Buttons */}
-                <div className="grid grid-cols-3 gap-2">
-                    <button
-                        onClick={() => setNoteMode(!noteMode)}
-                        className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${noteMode
-                            ? 'bg-ubuntu-orange text-white'
-                            : 'bg-gray-300 hover:bg-gray-400 text-gray-800'
-                            }`}
-                    >
-                        <Edit3 size={18} />
-                        Notes {noteMode ? 'ON' : 'OFF'}
-                    </button>
-                    <button
-                        onClick={handleErase}
-                        className="px-4 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
-                    >
-                        <Eraser size={18} />
-                        Erase
-                    </button>
-                    <button
-                        onClick={handleHint}
-                        className="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
-                    >
-                        <Lightbulb size={18} />
-                        Hint
-                    </button>
+                {/* Instructions */}
+                <div className="mt-4 text-center text-sm text-gray-600 max-w-md">
+                    <p className="mb-1">🖱️ Click cells to select, then click numbers to fill</p>
+                    <p className="mb-1">⌨️ Or use keyboard (1-6, Backspace to erase)</p>
+                    <p>💡 Use Notes mode to mark possible numbers</p>
                 </div>
-            </div>
-
-            {/* Instructions */}
-            <div className="mt-4 text-center text-sm text-gray-600 max-w-md">
-                <p className="mb-1">🖱️ Click cells to select, then click numbers to fill</p>
-                <p className="mb-1">⌨️ Or use keyboard (1-6, Backspace to erase)</p>
-                <p>💡 Use Notes mode to mark possible numbers</p>
             </div>
         </div>
     );
