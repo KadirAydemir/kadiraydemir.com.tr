@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { X, Minus, Square, Maximize2 } from 'lucide-react';
 import { useOSStore } from '../../store/useOSStore';
@@ -14,10 +14,19 @@ export const WindowFrame = ({ window, children }: WindowFrameProps) => {
     const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, restoreWindow, updateWindowPosition } = useOSStore();
     const { id, title, zIndex, isMinimized, isMaximized, position, size } = window;
     const nodeRef = useRef<HTMLDivElement>(null);
+    const [dragPosition, setDragPosition] = useState(position);
+
+    useEffect(() => {
+        setDragPosition(position);
+    }, [position]);
 
     if (isMinimized) return null;
 
     const handleDrag = (_e: any, data: { x: number; y: number }) => {
+        setDragPosition({ x: data.x, y: data.y });
+    };
+
+    const handleStop = (_e: any, data: { x: number; y: number }) => {
         updateWindowPosition(id, { x: data.x, y: data.y });
     };
 
@@ -25,8 +34,9 @@ export const WindowFrame = ({ window, children }: WindowFrameProps) => {
         <Draggable
             nodeRef={nodeRef}
             handle=".window-header"
-            position={isMaximized ? { x: 0, y: 0 } : position}
+            position={isMaximized ? { x: 0, y: 0 } : dragPosition}
             onDrag={handleDrag}
+            onStop={handleStop}
             disabled={isMaximized}
             bounds="parent"
         >
