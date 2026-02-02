@@ -157,11 +157,13 @@ export const SudokuGame = () => {
         const [row, col] = selectedCell;
 
         setGrid(prevGrid => {
-            const newGrid = prevGrid.map(r => r.map(c => ({ ...c, notes: new Set(c.notes) })));
+            if (prevGrid[row][col].isFixed) return prevGrid;
 
-            if (newGrid[row][col].isFixed) return prevGrid;
+            const newGrid = [...prevGrid];
+            newGrid[row] = [...newGrid[row]];
 
             if (noteMode) {
+                newGrid[row][col] = { ...newGrid[row][col], notes: new Set(newGrid[row][col].notes) };
                 // Toggle note
                 if (newGrid[row][col].notes.has(num)) {
                     newGrid[row][col].notes.delete(num);
@@ -169,9 +171,9 @@ export const SudokuGame = () => {
                     newGrid[row][col].notes.add(num);
                 }
             } else {
+                newGrid[row][col] = { ...newGrid[row][col], notes: new Set() };
                 // Set value
                 newGrid[row][col].value = num;
-                newGrid[row][col].notes.clear();
                 newGrid[row][col].isError = !isValidPlacement(newGrid, row, col, num);
 
                 // Check if puzzle is complete
@@ -193,12 +195,13 @@ export const SudokuGame = () => {
         const [row, col] = selectedCell;
 
         setGrid(prevGrid => {
-            const newGrid = prevGrid.map(r => r.map(c => ({ ...c, notes: new Set(c.notes) })));
+            if (prevGrid[row][col].isFixed) return prevGrid;
 
-            if (newGrid[row][col].isFixed) return prevGrid;
+            const newGrid = [...prevGrid];
+            newGrid[row] = [...newGrid[row]];
+            newGrid[row][col] = { ...newGrid[row][col], notes: new Set() };
 
             newGrid[row][col].value = null;
-            newGrid[row][col].notes.clear();
             newGrid[row][col].isError = false;
 
             return newGrid;
@@ -211,13 +214,14 @@ export const SudokuGame = () => {
         const [row, col] = selectedCell;
 
         setGrid(prevGrid => {
-            const newGrid = prevGrid.map(r => r.map(c => ({ ...c, notes: new Set(c.notes) })));
+            if (prevGrid[row][col].isFixed || prevGrid[row][col].value !== null) return prevGrid;
 
-            if (newGrid[row][col].isFixed || newGrid[row][col].value !== null) return prevGrid;
+            const newGrid = [...prevGrid];
+            newGrid[row] = [...newGrid[row]];
+            newGrid[row][col] = { ...newGrid[row][col], notes: new Set() };
 
             newGrid[row][col].value = solution[row][col];
             newGrid[row][col].isFixed = true;
-            newGrid[row][col].notes.clear();
             newGrid[row][col].isError = false;
             setHintsUsed(prev => prev + 1);
 
