@@ -11,10 +11,11 @@ interface WindowFrameProps {
 }
 
 export const WindowFrame = ({ window, children }: WindowFrameProps) => {
-    const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, restoreWindow, updateWindowPosition } = useOSStore();
+    const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, restoreWindow, updateWindowPosition, activeWindowId } = useOSStore();
     const { id, title, zIndex, isMinimized, isMaximized, position, size } = window;
     const nodeRef = useRef<HTMLDivElement>(null);
     const [dragPosition, setDragPosition] = useState(position);
+    const isActive = activeWindowId === id;
 
     useEffect(() => {
         setDragPosition(position);
@@ -37,13 +38,14 @@ export const WindowFrame = ({ window, children }: WindowFrameProps) => {
             position={isMaximized ? { x: 0, y: 0 } : dragPosition}
             onDrag={handleDrag}
             onStop={handleStop}
+            onStart={() => focusWindow(id)}
             disabled={isMaximized}
             bounds="parent"
         >
             <div
                 ref={nodeRef}
-                onMouseDown={() => focusWindow(id)}
-                className={`absolute flex flex-col bg-ubuntu-cool-grey shadow-2xl overflow-hidden border border-black/50 transition-all duration-200 ease-in-out ${isMaximized ? 'rounded-none' : 'rounded-lg'}`}
+                onMouseDownCapture={() => focusWindow(id)}
+                className={`absolute flex flex-col bg-ubuntu-cool-grey shadow-2xl overflow-hidden border border-black/50 transition-all duration-200 ease-in-out ${isMaximized ? 'rounded-none' : 'rounded-lg'} ${isActive ? 'ring-1 ring-white/20' : ''}`}
                 style={{
                     width: isMaximized ? 'calc(100vw - 64px)' : size.width,
                     height: isMaximized ? 'calc(100vh - 28px)' : size.height,
@@ -90,8 +92,18 @@ export const WindowFrame = ({ window, children }: WindowFrameProps) => {
                 {/* Content Area */}
                 <div
                     className="flex-1 overflow-auto bg-ubuntu-light-grey relative"
-                    onMouseDown={() => focusWindow(id)}
                 >
+                    {/* Invisible overlay to catch clicks on inactive windows (especially for iframes) */}
+                    {!isActive && (
+                        <div
+                            className="absolute inset-0 z-[9999] cursor-default"
+                            onMouseDown={(e) => {
+                                focusWindow(id);
+                                // We don't stop propagation here so onMouseDownCapture on parent also fires,
+                                // but more importantly, we catch the event before it hits an iframe.
+                            }}
+                        />
+                    )}
                     {children}
                 </div>
             </div>
