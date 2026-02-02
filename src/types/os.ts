@@ -17,8 +17,10 @@ export interface OSState {
     bootState: BootState;
     windows: WindowState[];
     activeWindowId: string | null;
+    cookieConsent: boolean | null;
 
     setBootState: (state: BootState) => void;
+    setCookieConsent: (consent: boolean) => void;
     openWindow: (appType: AppType, title: string) => void;
     closeWindow: (id: string) => void;
     focusWindow: (id: string) => void;

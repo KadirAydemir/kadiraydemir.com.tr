@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { BootScreen } from './components/os/BootScreen';
 import { Desktop } from './components/os/Desktop';
@@ -14,9 +15,25 @@ import { HtopApp } from './components/apps/HtopApp';
 import { AboutApp } from './components/apps/AboutApp';
 
 import { LoginScreen } from './components/os/LoginScreen';
+import { CookieBanner } from './components/ui/CookieBanner';
 
 function App() {
-    const { bootState, windows } = useOSStore();
+    const { bootState, windows, cookieConsent } = useOSStore();
+
+    // Load external scripts once consent is granted
+    useEffect(() => {
+        if (cookieConsent === true) {
+            const scriptID = 'linkedin-profile-badge-script';
+            if (!document.getElementById(scriptID)) {
+                const script = document.createElement('script');
+                script.id = scriptID;
+                script.src = "https://platform.linkedin.com/badges/js/profile.js";
+                script.async = true;
+                script.defer = true;
+                document.body.appendChild(script);
+            }
+        }
+    }, [cookieConsent]);
 
     return (
         <div className="h-screen w-screen overflow-hidden bg-black text-white selection:bg-ubuntu-orange selection:text-white relative font-ubuntu">
@@ -37,6 +54,7 @@ function App() {
             {bootState === 'desktop' && (
                 <>
                     <Taskbar />
+                    <CookieBanner />
 
                     {/* Window Manager Layer */}
                     <AnimatePresence>

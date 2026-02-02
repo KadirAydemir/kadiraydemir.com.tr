@@ -8,8 +8,15 @@ export const useOSStore = create<OSState>((set, get) => ({
     bootState: 'off',
     windows: [],
     activeWindowId: null,
+    cookieConsent: localStorage.getItem('cookie-consent') === 'true' ? true :
+        localStorage.getItem('cookie-consent') === 'false' ? false : null,
 
     setBootState: (state: BootState) => set({ bootState: state }),
+
+    setCookieConsent: (consent: boolean) => {
+        localStorage.setItem('cookie-consent', consent.toString());
+        set({ cookieConsent: consent });
+    },
 
     openWindow: (appType: AppType, title: string) => {
         const { windows } = get();

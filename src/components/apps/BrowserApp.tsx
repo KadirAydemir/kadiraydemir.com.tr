@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Globe, RefreshCw, AlertCircle, WifiOff, RotateCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Globe, RefreshCw, AlertCircle, WifiOff, RotateCcw, ShieldAlert, Cookie } from 'lucide-react';
+import { useOSStore } from '../../store/useOSStore';
+import { LinkedInBadge } from '../ui/LinkedInBadge';
 
 interface BrowserAppProps {
     defaultUrl?: string;
@@ -8,6 +10,7 @@ interface BrowserAppProps {
 export const BrowserApp: React.FC<BrowserAppProps> = ({
     defaultUrl = "https://www.linkedin.com/in/kadir-aydemir-3a1a55148/"
 }) => {
+    const { cookieConsent } = useOSStore();
     const [url, setUrl] = useState(defaultUrl);
     const [inputValue, setInputValue] = useState(defaultUrl);
     const [refreshKey, setRefreshKey] = useState(0);
@@ -23,52 +26,6 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
             setUrl(newUrl);
         }
     };
-
-    useEffect(() => {
-        if (url.includes('linkedin.com')) {
-            const scriptID = 'linkedin-profile-badge-script';
-
-            // Remove existing script to force reload and re-parse
-            const existingScript = document.getElementById(scriptID);
-            if (existingScript) {
-                existingScript.remove();
-            }
-
-            // Create and append new script
-            const script = document.createElement('script');
-            script.id = scriptID;
-            script.src = "https://platform.linkedin.com/badges/js/profile.js";
-            script.async = true;
-            script.defer = true;
-            document.body.appendChild(script);
-
-            const checkAndParse = (retries = 0) => {
-                const badgeElement = document.querySelector('.LI-profile-badge');
-                if ((window as any).LInGlobal && (window as any).LInGlobal.parseBadges && badgeElement) {
-                    (window as any).LInGlobal.parseBadges();
-                } else if (retries < 20) {
-                    setTimeout(() => checkAndParse(retries + 1), 100);
-                }
-            };
-
-            script.onload = () => checkAndParse();
-
-            // Also try after a short delay in case script was already in cache
-            const timeoutId = setTimeout(() => checkAndParse(), 500);
-
-            return () => {
-                clearTimeout(timeoutId);
-                const scriptToRemove = document.getElementById(scriptID);
-                if (scriptToRemove) {
-                    scriptToRemove.remove();
-                }
-                // Also clean up LinkedIn global to ensure fresh start next time
-                if ((window as any).LInGlobal) {
-                    delete (window as any).LInGlobal;
-                }
-            };
-        }
-    }, [url, refreshKey]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -142,7 +99,7 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                                     setIsError(false);
                                     setUrl(defaultUrl);
                                     setInputValue(defaultUrl);
-                                    setRefreshKey(prev => prev + 1); // Increment key to force LinkedIn re-render
+                                    setRefreshKey(prev => prev + 1);
                                 }}
                                 className="flex items-center gap-2 px-6 py-2 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-50 transition-colors font-medium"
                             >
@@ -156,32 +113,29 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                         </div>
                     </div>
                 ) : url.includes('linkedin.com') ? (
-                    <div className="flex flex-col items-center animate-in fade-in duration-700 w-full py-4">
-                        {/* Clean Official Badge Container */}
-                        <div key={refreshKey} className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
-                            <div
-                                className="badge-base LI-profile-badge"
-                                data-locale="tr_TR"
-                                data-size="large"
-                                data-theme="light"
-                                data-type="HORIZONTAL"
-                                data-vanity="kadir-aydemir-3a1a55148"
-                                data-version="v1"
-                            >
-                                <a
-                                    className="badge-base__link LI-simple-link"
-                                    href="https://tr.linkedin.com/in/kadir-aydemir-3a1a55148?trk=profile-badge"
-                                >
-                                    Profil Yükleniyor...
-                                </a>
+                    cookieConsent === true ? (
+                        <LinkedInBadge refreshKey={refreshKey} />
+                    ) : (
+                        <div className="w-full h-full bg-zinc-50 flex flex-col items-center justify-center p-8 text-center">
+                            <div className="bg-zinc-100 p-6 rounded-3xl mb-6 shadow-sm border border-zinc-200">
+                                <ShieldAlert size={48} className="text-zinc-400" />
                             </div>
+                            <h3 className="text-xl font-bold text-zinc-800 mb-2">Çerez Onayı Gerekiyor</h3>
+                            <p className="text-zinc-500 max-w-sm mb-8">
+                                LinkedIn profil rozetini görüntülemek için çerez kullanımına izin vermeniz gerekmektedir.
+                            </p>
+                            <button
+                                onClick={() => {
+                                    localStorage.removeItem('cookie-consent');
+                                    window.location.reload();
+                                }}
+                                className="bg-ubuntu-orange text-white px-8 py-3 rounded-full font-medium hover:bg-ubuntu-orange/90 transition-all shadow-lg shadow-ubuntu-orange/20 flex items-center gap-2"
+                            >
+                                <Cookie size={18} />
+                                Çerez Ayarlarını Sıfırla
+                            </button>
                         </div>
-
-                        <div className="mt-8 text-center max-w-xs">
-                            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-1">LinkedIn Official Profile</p>
-                            <p className="text-[10px] text-gray-400">Veriler doğrudan LinkedIn üzerinden güncellenmektedir.</p>
-                        </div>
-                    </div>
+                    )
                 ) : (
                     <div className="w-full h-full bg-white relative">
                         <iframe
@@ -196,3 +150,4 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
         </div>
     );
 };
+
