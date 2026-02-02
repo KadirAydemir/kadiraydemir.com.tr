@@ -23,13 +23,15 @@ export const useOSStore = create<OSState>((set, get) => ({
             return;
         }
 
+        const maxZIndex = windows.reduce((max, w) => Math.max(max, w.zIndex), START_Z_INDEX);
+
         const newWindow: WindowState = {
             id: crypto.randomUUID(),
             appType,
             title,
             isMinimized: false,
             isMaximized: false,
-            zIndex: START_Z_INDEX + windows.length + 1,
+            zIndex: maxZIndex + 1,
             position: { x: 100 + (windows.length * 30), y: 60 + (windows.length * 30) }, // Moved further right and down
             size: DEFAULT_WINDOW_SIZE,
         };
@@ -55,26 +57,19 @@ export const useOSStore = create<OSState>((set, get) => ({
             const targetWindow = state.windows.find(w => w.id === id);
             if (!targetWindow) return state;
 
-            // Sort existing windows by zIndex to maintain relative order
-            const otherWindows = state.windows
-                .filter(w => w.id !== id)
-                .sort((a, b) => a.zIndex - b.zIndex);
+            // Find current max zIndex
+            const maxZIndex = state.windows.reduce((max, w) => Math.max(max, w.zIndex), START_Z_INDEX);
 
-            // Re-assign z-indices starting from START_Z_INDEX
-            const reindexedWindows = otherWindows.map((w, idx) => ({
-                ...w,
-                zIndex: START_Z_INDEX + idx
-            }));
+            // Optimization: If already active and on top, do nothing
+            if (state.activeWindowId === id && targetWindow.zIndex === maxZIndex) {
+                return state;
+            }
 
-            // Active window gets the highest z-index
-            const focusedWindow = {
-                ...targetWindow,
-                zIndex: START_Z_INDEX + reindexedWindows.length
-            };
+            const newZIndex = maxZIndex + 1;
 
             return {
                 activeWindowId: id,
-                windows: [...reindexedWindows, focusedWindow]
+                windows: state.windows.map(w => w.id === id ? { ...w, zIndex: newZIndex } : w)
             };
         });
     },
