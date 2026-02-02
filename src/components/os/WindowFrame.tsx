@@ -57,6 +57,7 @@ export const WindowFrame = ({ window, children }: WindowFrameProps) => {
             >
                 {/* Header Bar */}
                 <div
+                    data-testid="window-header"
                     className="window-header h-9 bg-ubuntu-header flex items-center justify-between px-3 cursor-default select-none group shrink-0"
                     onDoubleClick={() => isMaximized ? restoreWindow(id) : maximizeWindow(id)}
                 >
@@ -66,12 +67,14 @@ export const WindowFrame = ({ window, children }: WindowFrameProps) => {
 
                     <div className="flex items-center gap-2">
                         <button
+                            data-testid="window-minimize"
                             onClick={(e) => { e.stopPropagation(); minimizeWindow(id); }}
                             className="w-5 h-5 rounded-full bg-ubuntu-warm-grey/20 hover:bg-ubuntu-warm-grey/50 flex items-center justify-center text-white transition-colors"
                         >
                             <Minus size={12} />
                         </button>
                         <button
+                            data-testid="window-maximize"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 isMaximized ? restoreWindow(id) : maximizeWindow(id);
@@ -81,6 +84,7 @@ export const WindowFrame = ({ window, children }: WindowFrameProps) => {
                             {isMaximized ? <Maximize2 size={10} /> : <Square size={10} />}
                         </button>
                         <button
+                            data-testid="window-close"
                             onClick={(e) => { e.stopPropagation(); closeWindow(id); }}
                             className="w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white transition-colors"
                         >
