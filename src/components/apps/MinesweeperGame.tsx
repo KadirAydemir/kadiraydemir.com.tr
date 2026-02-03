@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RotateCcw, Flag, Trophy, Bomb } from 'lucide-react';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -42,6 +43,7 @@ export const MinesweeperGame = () => {
     const [timer, setTimer] = useState(0);
     const [flagCount, setFlagCount] = useState(0);
     const [firstClick, setFirstClick] = useState(true);
+    const { t } = useTranslation();
 
     const config = DIFFICULTIES[difficulty];
 
@@ -265,16 +267,16 @@ export const MinesweeperGame = () => {
                     <div className="flex justify-between items-center mb-2">
                         <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                             <Bomb className="text-red-600" size={24} />
-                            Minesweeper
+                            {t('minesweeperGame.title')}
                         </h1>
                         <select
                             value={difficulty}
                             onChange={(e) => setDifficulty(e.target.value as Difficulty)}
                             className="px-3 py-1.5 border-2 border-gray-300 rounded-lg bg-white text-gray-800 font-semibold cursor-pointer hover:border-ubuntu-orange transition-colors text-sm"
                         >
-                            <option value="easy">Easy (9x9)</option>
-                            <option value="medium">Medium (16x16)</option>
-                            <option value="hard">Hard (30x16)</option>
+                            <option value="easy">{t('minesweeperGame.easy')}</option>
+                            <option value="medium">{t('minesweeperGame.medium')}</option>
+                            <option value="hard">{t('minesweeperGame.hard')}</option>
                         </select>
                     </div>
 
@@ -291,13 +293,13 @@ export const MinesweeperGame = () => {
                             className="px-4 py-1.5 bg-ubuntu-orange hover:bg-orange-600 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm"
                         >
                             <RotateCcw size={16} />
-                            New Game
+                            {t('minesweeperGame.newGame')}
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-lg font-mono font-bold">
                                 {String(timer).padStart(3, '0')}
                             </span>
-                            <span className="text-xs">sec</span>
+                            <span className="text-xs">{t('minesweeperGame.sec')}</span>
                         </div>
                     </div>
                 </div>
@@ -352,14 +354,14 @@ export const MinesweeperGame = () => {
                             {gameStatus === 'won' ? (
                                 <>
                                     <Trophy className="text-yellow-400 mb-4" size={64} />
-                                    <h2 className="text-4xl font-bold text-white mb-2">You Win! 🎉</h2>
-                                    <p className="text-xl text-gray-300 mb-6">Time: {timer} seconds</p>
+                                    <h2 className="text-4xl font-bold text-white mb-2">{t('minesweeperGame.win')}</h2>
+                                    <p className="text-xl text-gray-300 mb-6">{t('minesweeperGame.time', { time: timer })}</p>
                                 </>
                             ) : (
                                 <>
                                     <Bomb className="text-red-500 mb-4" size={64} />
-                                    <h2 className="text-4xl font-bold text-white mb-2">Game Over!</h2>
-                                    <p className="text-xl text-gray-300 mb-6">Better luck next time</p>
+                                    <h2 className="text-4xl font-bold text-white mb-2">{t('minesweeperGame.gameOver')}</h2>
+                                    <p className="text-xl text-gray-300 mb-6">{t('minesweeperGame.betterLuck')}</p>
                                 </>
                             )}
                             <button
@@ -367,7 +369,7 @@ export const MinesweeperGame = () => {
                                 className="px-6 py-3 bg-ubuntu-orange hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
                             >
                                 <RotateCcw size={20} />
-                                Play Again
+                                {t('minesweeperGame.playAgain')}
                             </button>
                         </div>
                     )}
@@ -375,9 +377,9 @@ export const MinesweeperGame = () => {
 
                 {/* Instructions */}
                 <div className="mt-6 text-center text-sm text-gray-600 max-w-md">
-                    <p className="mb-1">🖱️ Left click to reveal cells</p>
-                    <p className="mb-1">🚩 Right click to place/remove flags</p>
-                    <p>💡 Numbers show how many mines are nearby</p>
+                    <p className="mb-1">{t('minesweeperGame.clickReveal')}</p>
+                    <p className="mb-1">{t('minesweeperGame.clickFlag')}</p>
+                    <p>{t('minesweeperGame.numbersHint')}</p>
                 </div>
             </div>
         </div>

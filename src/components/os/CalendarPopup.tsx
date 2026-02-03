@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CalendarPopupProps {
@@ -6,15 +7,15 @@ interface CalendarPopupProps {
     onClose: () => void;
 }
 
-const DAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-const MONTHS = [
-    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
-];
+
 
 export const CalendarPopup = ({ isOpen, onClose }: CalendarPopupProps) => {
     const today = new Date();
     const [currentDate, setCurrentDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+    const { t } = useTranslation();
+
+    const DAYS = t('calendar.days', { returnObjects: true }) as string[];
+    const MONTHS = t('calendar.months', { returnObjects: true }) as string[];
 
     if (!isOpen) return null;
 
@@ -152,7 +153,7 @@ export const CalendarPopup = ({ isOpen, onClose }: CalendarPopupProps) => {
                 {/* Footer */}
                 <div className="px-4 py-2 bg-white/5 border-t border-white/10">
                     <div className="text-center text-xs text-gray-400">
-                        Bugün: {today.getDate()} {MONTHS[today.getMonth()]} {today.getFullYear()}
+                        {t('calendar.today', { date: `${today.getDate()} ${MONTHS[today.getMonth()]} ${today.getFullYear()}` })}
                     </div>
                 </div>
             </div>

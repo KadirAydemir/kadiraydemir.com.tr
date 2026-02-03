@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { BootScreen } from './components/os/BootScreen';
 import { Desktop } from './components/os/Desktop';
@@ -20,20 +19,8 @@ import { CookieBanner } from './components/ui/CookieBanner';
 function App() {
     const { bootState, windows, cookieConsent } = useOSStore();
 
-    // Load external scripts once consent is granted
-    useEffect(() => {
-        if (cookieConsent === true) {
-            const scriptID = 'linkedin-profile-badge-script';
-            if (!document.getElementById(scriptID)) {
-                const script = document.createElement('script');
-                script.id = scriptID;
-                script.src = "https://platform.linkedin.com/badges/js/profile.js";
-                script.async = true;
-                script.defer = true;
-                document.body.appendChild(script);
-            }
-        }
-    }, [cookieConsent]);
+    // External scripts are now loaded on-demand by the components that need them
+    // to improve initial load performance and avoid unnecessary execution.
 
     return (
         <div className="h-screen w-screen overflow-hidden bg-black text-white selection:bg-ubuntu-orange selection:text-white relative font-ubuntu">

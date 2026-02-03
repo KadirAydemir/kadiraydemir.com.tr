@@ -1,5 +1,6 @@
 import { Mail, Inbox, Star, Send, Trash2, Clock, Paperclip } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Email {
     id: number;
@@ -73,6 +74,7 @@ const fakeEmails: Email[] = [
 
 export const MailApp = () => {
     const [selectedEmail, setSelectedEmail] = useState<Email | null>(fakeEmails[0]);
+    const { t } = useTranslation();
 
     const handleCompose = () => {
         // Open Gmail compose with pre-filled recipient
@@ -88,14 +90,14 @@ export const MailApp = () => {
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 flex items-center justify-between shadow-md">
                 <div className="flex items-center gap-3">
                     <Mail size={24} />
-                    <h1 className="text-xl font-semibold">Mail</h1>
+                    <h1 className="text-xl font-semibold">{t('mailApp.title')}</h1>
                 </div>
                 <button
                     onClick={handleCompose}
                     className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center gap-2 shadow-sm"
                 >
                     <Send size={18} />
-                    Compose
+                    {t('mailApp.compose')}
                 </button>
             </div>
 
@@ -104,22 +106,22 @@ export const MailApp = () => {
                 <div className="w-48 bg-gray-50 border-r border-gray-200 p-3 space-y-1">
                     <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-100 text-blue-700 font-medium hover:bg-blue-200 transition-colors">
                         <Inbox size={18} />
-                        <span>Inbox</span>
+                        <span>{t('mailApp.inbox')}</span>
                         <span className="ml-auto bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
                             {fakeEmails.filter(e => !e.isRead).length}
                         </span>
                     </button>
                     <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors">
                         <Star size={18} />
-                        <span>Starred</span>
+                        <span>{t('mailApp.starred')}</span>
                     </button>
                     <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors">
                         <Send size={18} />
-                        <span>Sent</span>
+                        <span>{t('mailApp.sent')}</span>
                     </button>
                     <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors">
                         <Trash2 size={18} />
-                        <span>Trash</span>
+                        <span>{t('mailApp.trash')}</span>
                     </button>
                 </div>
 
@@ -189,11 +191,10 @@ export const MailApp = () => {
                                 <div className="text-gray-700 leading-relaxed space-y-4">
                                     <p>{selectedEmail.preview}</p>
                                     <p>
-                                        This is a demo email in your portfolio Web OS. Click the "Compose" button
-                                        above to send a real email to mail@kadiraydemir.com.tr via Gmail.
+                                        {t('mailApp.demoMessage')}
                                     </p>
                                     <p className="text-sm text-gray-500 italic">
-                                        Note: This is a simulated inbox for demonstration purposes.
+                                        {t('mailApp.demoNote')}
                                     </p>
                                 </div>
 
@@ -204,13 +205,13 @@ export const MailApp = () => {
                                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                                     >
                                         <Send size={16} />
-                                        Reply via Gmail
+                                        {t('mailApp.replyGmail')}
                                     </button>
                                     <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                                        Archive
+                                        {t('mailApp.archive')}
                                     </button>
                                     <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                                        Delete
+                                        {t('mailApp.delete')}
                                     </button>
                                 </div>
                             </div>
@@ -222,14 +223,14 @@ export const MailApp = () => {
                         <div className="flex-1 flex items-center justify-center bg-gray-50">
                             <div className="text-center text-gray-400">
                                 <Mail size={64} className="mx-auto mb-4 opacity-20" />
-                                <p className="text-lg">Select an email to read</p>
-                                <p className="text-sm mt-2">or</p>
+                                <p className="text-lg">{t('mailApp.selectEmail')}</p>
+                                <p className="text-sm mt-2">{t('mailApp.or')}</p>
                                 <button
                                     onClick={handleCompose}
                                     className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto"
                                 >
                                     <Send size={18} />
-                                    Compose New Email
+                                    {t('mailApp.composeNew')}
                                 </button>
                             </div>
                         </div>

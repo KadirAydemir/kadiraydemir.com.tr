@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Globe, RefreshCw, AlertCircle, WifiOff, RotateCcw, ShieldAlert, Cookie } from 'lucide-react';
 import { useOSStore } from '../../store/useOSStore';
 import { LinkedInBadge } from '../ui/LinkedInBadge';
@@ -15,6 +16,7 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
     const [inputValue, setInputValue] = useState(defaultUrl);
     const [refreshKey, setRefreshKey] = useState(0);
     const [isError, setIsError] = useState(false);
+    const { t } = useTranslation();
 
     const handleNavigation = (newUrl: string) => {
         // Simple logic: if navigation is attempted to a different domain or unknown address, show error
@@ -50,7 +52,7 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                             setInputValue(defaultUrl);
                         }}
                         className="p-1.5 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-ubuntu-orange"
-                        title="Ana Sayfa"
+                        title={t('browserApp.home')}
                     >
                         <Globe size={18} />
                     </button>
@@ -60,7 +62,7 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                             setRefreshKey(prev => prev + 1);
                         }}
                         className="p-1.5 hover:bg-gray-200 rounded-full transition-colors text-gray-500"
-                        title="Yenile"
+                        title={t('browserApp.refresh')}
                     >
                         <RefreshCw size={18} />
                     </button>
@@ -71,7 +73,7 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                     className="flex-1 bg-white border rounded-full px-4 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-ubuntu-orange border-gray-300 shadow-sm"
-                    placeholder="Search or enter address"
+                    placeholder={t('browserApp.searchPlaceholder')}
                 />
             </div>
 
@@ -82,9 +84,9 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                         <div className="bg-red-50 p-6 rounded-full mb-6">
                             <WifiOff size={64} className="text-red-500" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-2">İnternet Bağlantısı Yok</h2>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">{t('browserApp.errorTitle')}</h2>
                         <p className="text-gray-500 text-center max-w-sm mb-8">
-                            Görünüşe göre internete bağlı değilsiniz. Lütfen ağ ayarlarınızı kontrol edin veya daha sonra tekrar deneyin.
+                            {t('browserApp.errorMessage')}
                         </p>
                         <div className="flex gap-4">
                             <button
@@ -92,7 +94,7 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                                 className="flex items-center gap-2 px-6 py-2 bg-gray-400 text-white rounded-full cursor-not-allowed font-medium"
                             >
                                 <RotateCcw size={18} />
-                                Tekrar Dene
+                                {t('browserApp.retry')}
                             </button>
                             <button
                                 onClick={() => {
@@ -103,13 +105,13 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                                 }}
                                 className="flex items-center gap-2 px-6 py-2 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-50 transition-colors font-medium"
                             >
-                                Ana Sayfaya Dön
+                                {t('browserApp.returnHome')}
                             </button>
                         </div>
 
                         <div className="mt-12 flex items-center gap-2 text-gray-400 text-sm">
                             <AlertCircle size={16} />
-                            <span>Hata Kodu: ERR_INTERNET_DISCONNECTED</span>
+                            <span>{t('browserApp.errorDetail')}</span>
                         </div>
                     </div>
                 ) : url.includes('linkedin.com') ? (
@@ -120,9 +122,9 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                             <div className="bg-zinc-100 p-6 rounded-3xl mb-6 shadow-sm border border-zinc-200">
                                 <ShieldAlert size={48} className="text-zinc-400" />
                             </div>
-                            <h3 className="text-xl font-bold text-zinc-800 mb-2">Çerez Onayı Gerekiyor</h3>
+                            <h3 className="text-xl font-bold text-zinc-800 mb-2">{t('browserApp.cookieTitle')}</h3>
                             <p className="text-zinc-500 max-w-sm mb-8">
-                                LinkedIn profil rozetini görüntülemek için çerez kullanımına izin vermeniz gerekmektedir.
+                                {t('browserApp.cookieMessage')}
                             </p>
                             <button
                                 onClick={() => {
@@ -132,7 +134,7 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
                                 className="bg-ubuntu-orange text-white px-8 py-3 rounded-full font-medium hover:bg-ubuntu-orange/90 transition-all shadow-lg shadow-ubuntu-orange/20 flex items-center gap-2"
                             >
                                 <Cookie size={18} />
-                                Çerez Ayarlarını Sıfırla
+                                {t('browserApp.resetCookies')}
                             </button>
                         </div>
                     )
