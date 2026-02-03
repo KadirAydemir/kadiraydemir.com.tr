@@ -82,6 +82,7 @@ const TopBar = () => {
                 </div>
 
                 <div
+                    data-testid="system-tray"
                     className="flex items-center gap-2 hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer transition-colors"
                     onClick={() => setIsSystemMenuOpen(!isSystemMenuOpen)}
                 >
