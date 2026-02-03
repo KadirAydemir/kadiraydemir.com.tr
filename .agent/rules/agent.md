@@ -140,6 +140,20 @@ Integration: Place "CV.pdf" icon on desktop; clicking it opens CVApp via useProc
 - **FALLBACK UI:** If a third-party component (like LinkedIn Badge) cannot load due to missing consent, a polished placeholder/warning MUST be shown to the user with an option to manage settings.
 - **STABILITY:** When external scripts are needed, load them globally in `App.tsx` once consent is granted to avoid redundant injections and race conditions.
 
+## 6. Testing Rules (STRICT)
+
+1. **Preserve Existing Tests**:
+   - You MUST NOT delete or modify existing tests unless the feature they test has explicitly changed significantly or been removed.
+   - If a test fails, your first priority is to fix the code, not the test (unless the test itself is outdated).
+
+2. **Mandatory Testing for New Features**:
+   - For every new feature, component, or bug fix you implement, you MUST write corresponding tests.
+   - These can be unit tests, component tests, or E2E tests, depending on the scope of the change.
+   - Verify that your new tests pass before submitting.
+
+3. **Verify All Work**:
+   - Always run the full test suite (`npm run test`) before submitting changes to ensure no regressions were introduced.
+
 ---
 
 ### 🛠️ Updated Feature List (React Odaklı)
