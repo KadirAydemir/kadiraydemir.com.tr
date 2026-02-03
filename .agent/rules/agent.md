@@ -138,7 +138,7 @@ Integration: Place "CV.pdf" icon on desktop; clicking it opens CVApp via useProc
 - **COOKIE CONSENT:** All third-party scripts (LinkedIn, Analytics, etc.) MUST respect the `cookieConsent` state from `useOSStore`.
 - **PREVENTIVE LOADING:** External scripts must NOT be injected into the DOM unless `cookieConsent` is `true`.
 - **FALLBACK UI:** If a third-party component (like LinkedIn Badge) cannot load due to missing consent, a polished placeholder/warning MUST be shown to the user with an option to manage settings.
-- **STABILITY:** When external scripts are needed, load them globally in `App.tsx` once consent is granted to avoid redundant injections and race conditions.
+- **STABILITY & PERFORMANCE:** External scripts should be loaded ONLY when the specific component requiring them is mounted AND consent is granted. Use a check (like `document.getElementById`) to prevent duplicate injections. Do NOT load scripts globally in `App.tsx` if they are only used in specific apps.
 
 ---
 

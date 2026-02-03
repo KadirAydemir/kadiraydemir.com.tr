@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useOSStore } from '../../store/useOSStore';
 import { Linkedin, MapPin, ExternalLink, Briefcase } from 'lucide-react';
 import profileImage from '../../assets/profile.jpg';
 
@@ -10,7 +11,19 @@ export const LinkedInBadge: React.FC<LinkedInBadgeProps> = ({ refreshKey }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [showFallback, setShowFallback] = useState(false);
 
+    const { cookieConsent } = useOSStore(); // Determine consent from store
+
     useEffect(() => {
+        // Dynamic Script Loading for Performance
+        if (cookieConsent && !document.getElementById('linkedin-profile-badge-script')) {
+            const script = document.createElement('script');
+            script.id = 'linkedin-profile-badge-script';
+            script.src = "https://platform.linkedin.com/badges/js/profile.js";
+            script.async = true;
+            script.defer = true;
+            document.body.appendChild(script);
+        }
+
         let retries = 0;
         const maxRetries = 20;
 
@@ -43,7 +56,9 @@ export const LinkedInBadge: React.FC<LinkedInBadgeProps> = ({ refreshKey }) => {
             }
         };
 
-        // Initial attempt to parse
+        // If script is already loaded or just added, we need to wait for it to be ready
+        // If it was already there, tryParse will likely work immediately or after short retry
+        // If we just added it, retries will handle the network delay
         tryParse();
 
         // Safety timeout: if after 3 seconds it still hasn't loaded, show a premium fallback
@@ -61,7 +76,7 @@ export const LinkedInBadge: React.FC<LinkedInBadgeProps> = ({ refreshKey }) => {
                 delete (window as any).LInGlobal;
             }
         };
-    }, [refreshKey, isLoaded]); // Added isLoaded to dependencies to re-evaluate fallbackTimeout if badge loads
+    }, [refreshKey, isLoaded, cookieConsent]); // Added cookieConsent to deps
 
     if (showFallback) {
         return (

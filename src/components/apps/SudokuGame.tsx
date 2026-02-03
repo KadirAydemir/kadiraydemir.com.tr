@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RotateCcw, Lightbulb, Eraser, Edit3, Trophy } from 'lucide-react';
 
 type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
@@ -90,6 +91,7 @@ export const SudokuGame = () => {
     const [timer, setTimer] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [hintsUsed, setHintsUsed] = useState(0);
+    const { t } = useTranslation();
 
     // Generate a solved 6x6 Sudoku grid
     const generateSolvedGrid = useCallback((): number[][] => {
@@ -333,17 +335,17 @@ export const SudokuGame = () => {
                 <div className="w-full max-w-lg mb-2">
                     <div className="flex justify-between items-center mb-2">
                         <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                            🔢 Sudoku 6×6
+                            🔢 {t('sudokuGame.title')}
                         </h1>
                         <select
                             value={difficulty}
                             onChange={(e) => setDifficulty(e.target.value as Difficulty)}
                             className="px-3 py-1.5 border-2 border-gray-300 rounded-lg bg-white text-gray-800 font-semibold cursor-pointer hover:border-ubuntu-orange transition-colors text-sm"
                         >
-                            <option value="easy">Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
-                            <option value="expert">Expert</option>
+                            <option value="easy">{t('sudokuGame.easy')}</option>
+                            <option value="medium">{t('sudokuGame.medium')}</option>
+                            <option value="hard">{t('sudokuGame.hard')}</option>
+                            <option value="expert">{t('sudokuGame.expert')}</option>
                         </select>
                     </div>
 
@@ -357,11 +359,11 @@ export const SudokuGame = () => {
                             className="px-4 py-1.5 bg-ubuntu-orange hover:bg-orange-600 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm"
                         >
                             <RotateCcw size={16} />
-                            New Game
+                            {t('sudokuGame.newGame')}
                         </button>
                         <div className="flex items-center gap-2">
                             <Lightbulb size={16} className="text-yellow-400" />
-                            <span className="text-sm">Hints: {hintsUsed}</span>
+                            <span className="text-sm">{t('sudokuGame.hints', { count: hintsUsed })}</span>
                         </div>
                     </div>
                 </div>
@@ -378,15 +380,15 @@ export const SudokuGame = () => {
                     {isComplete && (
                         <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-lg">
                             <Trophy className="text-yellow-400 mb-4" size={64} />
-                            <h2 className="text-4xl font-bold text-white mb-2">Congratulations! 🎉</h2>
-                            <p className="text-xl text-gray-300 mb-2">Time: {formatTime(timer)}</p>
-                            <p className="text-lg text-gray-400 mb-6">Hints used: {hintsUsed}</p>
+                            <h2 className="text-4xl font-bold text-white mb-2">{t('sudokuGame.win')}</h2>
+                            <p className="text-xl text-gray-300 mb-2">{t('sudokuGame.time', { time: formatTime(timer) })}</p>
+                            <p className="text-lg text-gray-400 mb-6">{t('sudokuGame.hintsUsed', { count: hintsUsed })}</p>
                             <button
                                 onClick={newGame}
                                 className="px-6 py-3 bg-ubuntu-orange hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
                             >
                                 <RotateCcw size={20} />
-                                Play Again
+                                {t('sudokuGame.playAgain')}
                             </button>
                         </div>
                     )}
@@ -417,30 +419,30 @@ export const SudokuGame = () => {
                                 }`}
                         >
                             <Edit3 size={16} />
-                            Notes {noteMode ? 'ON' : 'OFF'}
+                            {noteMode ? t('sudokuGame.notesOn') : t('sudokuGame.notesOff')}
                         </button>
                         <button
                             onClick={handleErase}
                             className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 text-sm"
                         >
                             <Eraser size={16} />
-                            Erase
+                            {t('sudokuGame.erase')}
                         </button>
                         <button
                             onClick={handleHint}
                             className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 text-sm"
                         >
                             <Lightbulb size={16} />
-                            Hint
+                            {t('sudokuGame.hint')}
                         </button>
                     </div>
                 </div>
 
                 {/* Instructions */}
                 <div className="mt-4 text-center text-sm text-gray-600 max-w-md">
-                    <p className="mb-1">🖱️ Click cells to select, then click numbers to fill</p>
-                    <p className="mb-1">⌨️ Or use keyboard (1-6, Backspace to erase)</p>
-                    <p>💡 Use Notes mode to mark possible numbers</p>
+                    <p className="mb-1">{t('sudokuGame.clickSelect')}</p>
+                    <p className="mb-1">{t('sudokuGame.keyboard')}</p>
+                    <p>{t('sudokuGame.notesHint')}</p>
                 </div>
             </div>
         </div>

@@ -1,6 +1,8 @@
 import { Cpu, MemoryStick, HardDrive, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const AboutApp = () => {
+    const { t } = useTranslation();
     return (
         <div className="h-full w-full bg-ubuntu-warm-grey text-white p-8 overflow-y-auto font-ubuntu select-none flex flex-col items-center justify-center">
 
@@ -8,17 +10,17 @@ export const AboutApp = () => {
                 <Info size={64} className="text-white" />
             </div>
 
-            <h1 className="text-4xl font-bold mb-2 tracking-tight">KadirOS</h1>
-            <p className="text-ubuntu-cool-grey text-lg mb-8">Version 24.04 LTS (Jammy Jellyfish)</p>
+            <h1 className="text-4xl font-bold mb-2 tracking-tight">{t('aboutApp.title')}</h1>
+            <p className="text-ubuntu-cool-grey text-lg mb-8">{t('aboutApp.version')}</p>
 
             <div className="w-full max-w-md bg-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10 shadow-lg">
-                <h2 className="text-xl font-bold mb-4 border-b border-white/10 pb-2">Hardware Information</h2>
+                <h2 className="text-xl font-bold mb-4 border-b border-white/10 pb-2">{t('aboutApp.hardwareInfo')}</h2>
 
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-gray-300">
                             <MemoryStick size={20} />
-                            <span>Memory</span>
+                            <span>{t('aboutApp.memory')}</span>
                         </div>
                         <span className="font-mono text-ubuntu-orange">16.0 GiB</span>
                     </div>
@@ -26,18 +28,18 @@ export const AboutApp = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-gray-300">
                             <Cpu size={20} />
-                            <span>Processor</span>
+                            <span>{t('aboutApp.processor')}</span>
                         </div>
                         <div className="text-right">
                             <span className="font-mono text-ubuntu-orange block">AMD Ryzen™ 7 5800H</span>
-                            <span className="text-xs text-gray-500">with Radeon™ Graphics</span>
+                            <span className="text-xs text-gray-500">{t('aboutApp.graphics')}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-gray-300">
                             <HardDrive size={20} />
-                            <span>Disk Capacity</span>
+                            <span>{t('aboutApp.diskCapacity')}</span>
                         </div>
                         <span className="font-mono text-ubuntu-orange">1.0 TB</span>
                     </div>
@@ -45,7 +47,7 @@ export const AboutApp = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 text-gray-300">
                             <Info size={20} />
-                            <span>OS Type</span>
+                            <span>{t('aboutApp.osType')}</span>
                         </div>
                         <span className="font-mono text-ubuntu-orange">64-bit</span>
                     </div>
@@ -53,11 +55,11 @@ export const AboutApp = () => {
             </div>
 
             <div className="mt-12 text-center text-gray-400 text-sm">
-                <p className="mb-2">© 2026 Kadir Aydemir. All rights reserved.</p>
+                <p className="mb-2">{t('aboutApp.copyright')}</p>
                 <p className="max-w-md mx-auto text-xs leading-relaxed opacity-70">
-                    This operating system interface is a portfolio project designed and developed by Kadir Aydemir.
-                    MIT License applies to the source code structure, but personal content and branding rights are reserved.
-                    Unofficial Ubuntu-themed conceptual design.
+                    {t('aboutApp.description')}
+                    {t('aboutApp.license')}
+                    {t('aboutApp.concept')}
                 </p>
             </div>
 
@@ -66,13 +68,13 @@ export const AboutApp = () => {
                     onClick={() => window.open('https://kadiraydemir.com.tr', '_blank')}
                     className="px-6 py-2 bg-ubuntu-orange hover:bg-orange-600 transition-colors rounded-full text-sm font-bold shadow-lg"
                 >
-                    Website
+                    {t('aboutApp.website')}
                 </button>
                 <button
                     onClick={() => window.location.reload()}
                     className="px-6 py-2 bg-gray-700 hover:bg-gray-600 transition-colors rounded-full text-sm font-bold shadow-lg"
                 >
-                    System Restart
+                    {t('aboutApp.restart')}
                 </button>
             </div>
         </div>
