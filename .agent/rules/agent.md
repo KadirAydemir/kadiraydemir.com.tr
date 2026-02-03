@@ -154,6 +154,14 @@ Integration: Place "CV.pdf" icon on desktop; clicking it opens CVApp via useProc
 3. **Verify All Work**:
    - Always run the full test suite (`npm run test`) before submitting changes to ensure no regressions were introduced.
 
+## 7. Mobile Responsiveness Rules (STRICT)
+- **DESKTOP FIRST & MOBILE FRIENDLY:** The primary target is desktop users. The UI must be rich and optimized for desktop, but remain functional and accessible on mobile devices.
+- **FULL SCREEN APPS:** On mobile devices, all opened applications MUST be forced to full screen.
+  - Disable usage of draggable features on mobile.
+  - Hide "Maximize/Restore" buttons on mobile as they are redundant.
+  - Ensure `z-index` handling keeps the active mobile app on top.
+- **TOUCH TARGETS:** Ensure all interactive elements (icons, buttons) are easily tappable on touch screens (min 44x44px where possible).
+
 ---
 
 ### 🛠️ Updated Feature List (React Odaklı)
