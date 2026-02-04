@@ -163,8 +163,15 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
     };
 
     const handleRenameSubmit = async (id: string) => {
-        if (renameValue.trim() && renameValue.trim() !== selectedItem?.name) {
-            await renameItem(id, renameValue.trim());
+        const item = folderItems.find(i => i.id === id);
+        let newName = renameValue.trim();
+
+        if (item?.extension === 'txt' && newName && !newName.toLowerCase().endsWith('.txt')) {
+            newName += '.txt';
+        }
+
+        if (newName && newName !== item?.name) {
+            await renameItem(id, newName);
         }
         setRenamingId(null);
     };
