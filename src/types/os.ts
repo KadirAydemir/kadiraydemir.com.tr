@@ -1,6 +1,6 @@
 export type BootState = 'off' | 'booting' | 'login' | 'desktop';
 
-export type AppType = 'cv' | 'terminal' | 'settings' | 'browser' | 'explorer' | 'mail' | 'minesweeper' | 'sudoku' | 'htop' | 'about';
+export type AppType = 'cv' | 'terminal' | 'settings' | 'browser' | 'explorer' | 'mail' | 'minesweeper' | 'sudoku' | 'htop' | 'about' | 'projects';
 
 export interface WindowState {
     id: string;
@@ -11,6 +11,7 @@ export interface WindowState {
     zIndex: number;
     position: { x: number; y: number };
     size: { width: number; height: number };
+    params?: any;
 }
 
 export interface OSState {
@@ -21,7 +22,7 @@ export interface OSState {
 
     setBootState: (state: BootState) => void;
     setCookieConsent: (consent: boolean) => void;
-    openWindow: (appType: AppType, title: string) => void;
+    openWindow: (appType: AppType, title: string, params?: any) => void;
     closeWindow: (id: string) => void;
     focusWindow: (id: string) => void;
     minimizeWindow: (id: string) => void;

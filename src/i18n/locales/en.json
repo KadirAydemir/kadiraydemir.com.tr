@@ -8,7 +8,17 @@
     "minesweeper": "Minesweeper",
     "sudoku": "Sudoku",
     "htop": "Htop",
-    "about": "System Info"
+    "about": "System Info",
+    "explorer": "Files",
+    "projects": "Projects"
+  },
+  "projects": {
+    "loading": "Loading GitHub projects...",
+    "errorTitle": "Connection Error",
+    "retry": "Try Again",
+    "search": "Search projects...",
+    "noResults": "No matching projects found.",
+    "repoCount": "Repositories Total"
   },
   "system": {
     "wifi": "Wi-Fi",
@@ -137,5 +147,25 @@
       "December"
     ],
     "today": "Today: {{date}}"
+  },
+  "fileExplorer": {
+    "title": "Files",
+    "quickAccess": "Quick Access",
+    "devices": "Devices",
+    "emptyFolder": "This folder is empty",
+    "item": "item",
+    "items": "items",
+    "modified": "Modified",
+    "folders": {
+      "home": "Home",
+      "recent": "Recent",
+      "starred": "Starred",
+      "desktop": "Desktop",
+      "documents": "Documents",
+      "downloads": "Downloads",
+      "music": "Music",
+      "pictures": "Pictures",
+      "videos": "Videos"
+    }
   }
 }

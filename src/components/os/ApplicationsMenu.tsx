@@ -1,4 +1,4 @@
-import { Terminal, Settings, Globe, Mail, Bomb, Grid3x3, Search, Activity, Info } from 'lucide-react';
+import { Terminal, Settings, Globe, Mail, Bomb, Grid3x3, Search, Activity, Info, Folder, Github } from 'lucide-react';
 import { useProcess } from '../../hooks/useProcess';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -40,7 +40,7 @@ const AppItem = ({ label, icon, onClick }: AppItemProps) => (
 );
 
 export const ApplicationsMenu = ({ isOpen, onClose }: ApplicationsMenuProps) => {
-    const { openTerminal, openSettings, openBrowser, openMail, openMinesweeper, openSudoku, openHtop, openAbout } = useProcess();
+    const { openTerminal, openSettings, openBrowser, openMail, openMinesweeper, openSudoku, openHtop, openAbout, openExplorer, openProjects } = useProcess();
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState<'frequent' | 'all'>('frequent');
     const [currentPage, setCurrentPage] = useState(0);
@@ -66,6 +66,13 @@ export const ApplicationsMenu = ({ isOpen, onClose }: ApplicationsMenuProps) => 
             label: t('apps.browser'),
             icon: <Globe size={28} />,
             onClick: openBrowser,
+            frequent: true
+        },
+        {
+            id: 'explorer',
+            label: t('apps.explorer'),
+            icon: <Folder size={28} />,
+            onClick: openExplorer,
             frequent: true
         },
         {
@@ -109,6 +116,13 @@ export const ApplicationsMenu = ({ isOpen, onClose }: ApplicationsMenuProps) => 
             icon: <Info size={28} />,
             onClick: openAbout,
             frequent: false
+        },
+        {
+            id: 'projects',
+            label: t('apps.projects'),
+            icon: <Github size={28} />,
+            onClick: openProjects,
+            frequent: true
         }
     ];
 

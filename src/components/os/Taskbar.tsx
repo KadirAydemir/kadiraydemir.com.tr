@@ -1,4 +1,4 @@
-import { Battery, WifiOff, Volume2, Power, Grid, FileText, Terminal, Globe, Mail, Settings, Bomb, Grid3x3 } from 'lucide-react';
+import { Battery, WifiOff, Volume2, Power, Grid, FileText, Terminal, Globe, Mail, Settings, Bomb, Grid3x3, Folder } from 'lucide-react';
 import { useTime } from '../../hooks/useTime';
 import { useProcess } from '../../hooks/useProcess';
 import { useOSStore } from '../../store/useOSStore';
@@ -28,6 +28,8 @@ const getAppIcon = (appType: string) => {
             return <Bomb className="text-red-400" size={28} />;
         case 'sudoku':
             return <Grid3x3 className="text-purple-400" size={28} />;
+        case 'explorer':
+            return <Folder className="text-orange-300" size={28} />;
         default:
             return <FileText className="text-white" size={28} />;
     }
@@ -109,7 +111,7 @@ const DockItem = ({ icon, onClick, isOpen, name }: { icon: React.ReactNode, onCl
 );
 
 export const Taskbar = () => {
-    const { toggleCV, toggleTerminal, toggleBrowser, toggleMail, toggleSettings, toggleMinesweeper, toggleSudoku } = useProcess();
+    const { toggleCV, toggleTerminal, toggleBrowser, toggleMail, toggleSettings, toggleMinesweeper, toggleSudoku, toggleExplorer } = useProcess();
     const { windows } = useOSStore();
     const [isAppsMenuOpen, setIsAppsMenuOpen] = useState(false);
     const { t } = useTranslation();
@@ -125,6 +127,7 @@ export const Taskbar = () => {
             case 'settings': return toggleSettings;
             case 'minesweeper': return toggleMinesweeper;
             case 'sudoku': return toggleSudoku;
+            case 'explorer': return toggleExplorer;
             default: return () => { };
         }
     };
@@ -151,15 +154,21 @@ export const Taskbar = () => {
                     isOpen={isAppOpen('browser')}
                     name={t('apps.browser')}
                 />
+                <DockItem
+                    icon={<Folder className="text-orange-300" size={28} />}
+                    onClick={toggleExplorer}
+                    isOpen={isAppOpen('explorer')}
+                    name={t('apps.explorer')}
+                />
 
                 {/* Separator - Only show if there are non-pinned apps open */}
-                {openAppTypes.filter(appType => appType !== 'cv' && appType !== 'browser').length > 0 && (
+                {openAppTypes.filter(appType => appType !== 'cv' && appType !== 'browser' && appType !== 'explorer').length > 0 && (
                     <div className="w-10 h-px bg-white/20 my-1" />
                 )}
 
                 {/* Dynamically render icons for other open apps */}
                 {openAppTypes
-                    .filter(appType => appType !== 'cv' && appType !== 'browser') // Exclude pinned apps
+                    .filter(appType => appType !== 'cv' && appType !== 'browser' && appType !== 'explorer') // Exclude pinned apps
                     .map((appType) => (
                         <DockItem
                             key={appType}

@@ -18,11 +18,17 @@ export const useOSStore = create<OSState>((set, get) => ({
         set({ cookieConsent: consent });
     },
 
-    openWindow: (appType: AppType, title: string) => {
+    openWindow: (appType: AppType, title: string, params?: any) => {
         const { windows } = get();
         // Check if app is already open
         const existingWindow = windows.find((w) => w.appType === appType);
         if (existingWindow) {
+            // Update params if provided
+            if (params) {
+                set({
+                    windows: windows.map(w => w.id === existingWindow.id ? { ...w, params } : w)
+                });
+            }
             get().focusWindow(existingWindow.id);
             if (existingWindow.isMinimized) {
                 get().restoreWindow(existingWindow.id);
@@ -41,6 +47,7 @@ export const useOSStore = create<OSState>((set, get) => ({
             zIndex: START_Z_INDEX + windows.length + 1,
             position: { x: 100 + (windows.length * 30), y: 60 + (windows.length * 30) }, // Moved further right and down
             size: DEFAULT_WINDOW_SIZE,
+            params,
         };
 
         set({

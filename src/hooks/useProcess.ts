@@ -30,6 +30,12 @@ export const useProcess = () => {
     const openAbout = () => openWindow('about', 'About System');
     const toggleAbout = () => toggleWindow('about', 'About System');
 
+    const openExplorer = (params?: any) => openWindow('explorer', 'Files', params);
+    const toggleExplorer = () => toggleWindow('explorer', 'Files');
+
+    const openProjects = () => openWindow('projects', 'GitHub Projects');
+    const toggleProjects = () => toggleWindow('projects', 'GitHub Projects');
+
     return {
         openCV,
         toggleCV,
@@ -49,5 +55,9 @@ export const useProcess = () => {
         toggleHtop,
         openAbout,
         toggleAbout,
+        openExplorer,
+        toggleExplorer,
+        openProjects,
+        toggleProjects,
     };
 };

@@ -12,6 +12,8 @@ import { MinesweeperGame } from './components/apps/MinesweeperGame';
 import { SudokuGame } from './components/apps/SudokuGame';
 import { HtopApp } from './components/apps/HtopApp';
 import { AboutApp } from './components/apps/AboutApp';
+import { FileExplorerApp } from './components/apps/FileExplorerApp';
+import { ProjectsApp } from './components/apps/ProjectsApp';
 
 import { LoginScreen } from './components/os/LoginScreen';
 import { CookieBanner } from './components/ui/CookieBanner';
@@ -68,6 +70,9 @@ function App() {
                                 {win.appType === 'htop' && <HtopApp />}
 
                                 {win.appType === 'about' && <AboutApp />}
+
+                                {win.appType === 'explorer' && <FileExplorerApp initialPath={win.params?.path} />}
+                                {win.appType === 'projects' && <ProjectsApp />}
                             </WindowFrame>
                         ))}
                     </AnimatePresence>

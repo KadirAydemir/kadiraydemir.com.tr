@@ -8,7 +8,17 @@
     "minesweeper": "Mayın Tarlası",
     "sudoku": "Sudoku",
     "htop": "Htop",
-    "about": "Sistem Bilgisi"
+    "about": "Sistem Bilgisi",
+    "explorer": "Dosyalar",
+    "projects": "Projeler"
+  },
+  "projects": {
+    "loading": "GitHub projeleri yükleniyor...",
+    "errorTitle": "Bağlantı Hatası",
+    "retry": "Tekrar Dene",
+    "search": "Projelerde ara...",
+    "noResults": "Eşleşen proje bulunamadı.",
+    "repoCount": "Toplam Proje Sayısı"
   },
   "system": {
     "wifi": "Wi-Fi",
@@ -137,5 +147,25 @@
       "Aralık"
     ],
     "today": "Bugün: {{date}}"
+  },
+  "fileExplorer": {
+    "title": "Dosyalar",
+    "quickAccess": "Hızlı Erişim",
+    "devices": "Cihazlar",
+    "emptyFolder": "Bu klasör boş",
+    "item": "öğe",
+    "items": "öğe",
+    "modified": "Değiştirildi",
+    "folders": {
+      "home": "Başlangıç",
+      "recent": "Son Kullanılanlar",
+      "starred": "Yıldızlı",
+      "desktop": "Masaüstü",
+      "documents": "Belgeler",
+      "downloads": "İndirilenler",
+      "music": "Müzik",
+      "pictures": "Resimler",
+      "videos": "Videolar"
+    }
   }
 }
