@@ -20,7 +20,7 @@ vi.mock('lucide-react', async (importOriginal) => {
 // Mock Framer Motion to avoid animation issues
 vi.mock('framer-motion', () => ({
     motion: {
-        div: ({ children, className, onClick, ...props }: any) => (
+        div: ({ children, className, onClick, layoutId, ...props }: any) => (
             <div className={className} onClick={onClick} {...props}>
                 {children}
             </div>
@@ -43,61 +43,65 @@ describe('ApplicationsMenu', () => {
 
     it('renders nothing when isOpen is false', () => {
         render(<ApplicationsMenu isOpen={false} onClose={mockOnClose} />);
-        expect(screen.queryByPlaceholderText('Type to search...')).not.toBeInTheDocument();
+        expect(screen.queryByPlaceholderText('applicationsMenu.searchPlaceholder')).not.toBeInTheDocument();
     });
 
     it('renders correctly when isOpen is true', () => {
         render(<ApplicationsMenu isOpen={true} onClose={mockOnClose} />);
 
-        expect(screen.getByPlaceholderText('Type to search...')).toBeInTheDocument();
-        expect(screen.getByText('Frequent')).toBeInTheDocument();
-        expect(screen.getByText('All Applications')).toBeInTheDocument();
+        expect(screen.getByPlaceholderText('applicationsMenu.searchPlaceholder')).toBeInTheDocument();
+        expect(screen.getByText('applicationsMenu.frequent')).toBeInTheDocument();
+        expect(screen.getByText('applicationsMenu.allApplications')).toBeInTheDocument();
     });
 
     it('shows frequent apps by default', () => {
         render(<ApplicationsMenu isOpen={true} onClose={mockOnClose} />);
 
         // Terminal, Browser, Mail are frequent
-        expect(screen.getByText('Terminal')).toBeInTheDocument();
-        expect(screen.getByText('Browser')).toBeInTheDocument();
-        expect(screen.getByText('Mail')).toBeInTheDocument();
+        expect(screen.getByText('apps.terminal')).toBeInTheDocument();
+        expect(screen.getByText('apps.browser')).toBeInTheDocument();
+        expect(screen.getByText('apps.mail')).toBeInTheDocument();
 
         // Minesweeper, Sudoku are not frequent (in default list)
         // Note: verify if Minesweeper is frequent in ApplicationsMenu.tsx
         // Looking at file: Minesweeper frequent: false
-        expect(screen.queryByText('Minesweeper')).not.toBeInTheDocument();
+        expect(screen.queryByText('apps.minesweeper')).not.toBeInTheDocument();
     });
 
     it('switches to All Applications tab', () => {
         render(<ApplicationsMenu isOpen={true} onClose={mockOnClose} />);
 
-        const allAppsTab = screen.getByText('All Applications');
+        const allAppsTab = screen.getByText('applicationsMenu.allApplications');
         fireEvent.click(allAppsTab);
 
         // Now Minesweeper should be visible
-        expect(screen.getByText('Minesweeper')).toBeInTheDocument();
+        expect(screen.getByText('apps.minesweeper')).toBeInTheDocument();
         // Terminal should still be visible
-        expect(screen.getByText('Terminal')).toBeInTheDocument();
+        expect(screen.getByText('apps.terminal')).toBeInTheDocument();
     });
 
     it('filters apps by search query', () => {
         render(<ApplicationsMenu isOpen={true} onClose={mockOnClose} />);
 
         // Switch to All Apps to search everything
-        fireEvent.click(screen.getByText('All Applications'));
+        fireEvent.click(screen.getByText('applicationsMenu.allApplications'));
 
-        const searchInput = screen.getByPlaceholderText('Type to search...');
+        const searchInput = screen.getByPlaceholderText('applicationsMenu.searchPlaceholder');
+        // Searching for 'mine' should match 'apps.minesweeper' if we were searching label.
+        // But logic is: app.label.toLowerCase().includes(searchQuery.toLowerCase())
+        // app.label IS the key 'apps.minesweeper'.
+        // So searching 'mine' should find 'apps.minesweeper'.
         fireEvent.change(searchInput, { target: { value: 'mine' } });
 
-        expect(screen.getByText('Minesweeper')).toBeInTheDocument();
-        expect(screen.queryByText('Terminal')).not.toBeInTheDocument();
-        expect(screen.queryByText('Browser')).not.toBeInTheDocument();
+        expect(screen.getByText('apps.minesweeper')).toBeInTheDocument();
+        expect(screen.queryByText('apps.terminal')).not.toBeInTheDocument();
+        expect(screen.queryByText('apps.browser')).not.toBeInTheDocument();
     });
 
     it('launches an app and closes menu', () => {
         render(<ApplicationsMenu isOpen={true} onClose={mockOnClose} />);
 
-        const terminalApp = screen.getByText('Terminal');
+        const terminalApp = screen.getByText('apps.terminal');
         // Click the button wrapping the text
         fireEvent.click(terminalApp.closest('button')!);
 

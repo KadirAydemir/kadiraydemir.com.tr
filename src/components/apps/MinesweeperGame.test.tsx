@@ -20,8 +20,9 @@ describe('MinesweeperGame', () => {
     it('renders correctly with default settings (easy)', () => {
         render(<MinesweeperGame />);
 
-        expect(screen.getByText('Minesweeper')).toBeInTheDocument();
-        expect(screen.getByText('New Game')).toBeInTheDocument();
+        // Expect translation keys
+        expect(screen.getByText('minesweeperGame.title')).toBeInTheDocument();
+        expect(screen.getByText('minesweeperGame.newGame')).toBeInTheDocument();
 
         // Default easy mode: 9x9 = 81 cells
         const cells = getCells();
@@ -89,7 +90,7 @@ describe('MinesweeperGame', () => {
         fireEvent.click(cells[0]);
 
         // Click New Game
-        const newGameBtn = screen.getByText('New Game');
+        const newGameBtn = screen.getByText('minesweeperGame.newGame');
         fireEvent.click(newGameBtn);
 
         // Should be back to initial state
@@ -129,7 +130,7 @@ describe('MinesweeperGame', () => {
 
         // Alternatively, we can test that the "Game Over" text is NOT present initially.
         render(<MinesweeperGame />);
-        expect(screen.queryByText('Game Over!')).not.toBeInTheDocument();
+        expect(screen.queryByText('minesweeperGame.gameOver')).not.toBeInTheDocument();
 
         randomSpy.mockRestore();
     });

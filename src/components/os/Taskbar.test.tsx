@@ -39,7 +39,7 @@ describe('Taskbar', () => {
         render(<Taskbar />);
 
         // "Activities" button
-        expect(screen.getByText('Activities')).toBeInTheDocument();
+        expect(screen.getByText('system.activities')).toBeInTheDocument();
 
         // Date/Time
         const dateEl = screen.getByTitle(/, \d{4}/);
@@ -89,15 +89,15 @@ describe('Taskbar', () => {
         // Applications is always there.
 
         // Note: Use getAllByText because tooltip text might appear elsewhere (unlikely for CV/Browser unless open).
-        expect(screen.getAllByText('CV').length).toBeGreaterThan(0);
-        expect(screen.getAllByText('Browser').length).toBeGreaterThan(0);
-        expect(screen.getAllByText('Applications').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('apps.cv').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('apps.browser').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('system.applications').length).toBeGreaterThan(0);
     });
 
     it('opens CV app when clicking CV dock item', () => {
         render(<Taskbar />);
 
-        const cvTooltip = screen.getAllByText('CV').find(el => el.classList.contains('text-xs'));
+        const cvTooltip = screen.getAllByText('apps.cv').find(el => el.classList.contains('text-xs'));
         expect(cvTooltip).toBeTruthy();
 
         const dockItem = cvTooltip!.parentElement;
@@ -116,7 +116,7 @@ describe('Taskbar', () => {
 
         render(<Taskbar />);
 
-        const browserTooltip = screen.getAllByText('Browser').find(el => el.classList.contains('text-xs'));
+        const browserTooltip = screen.getAllByText('apps.browser').find(el => el.classList.contains('text-xs'));
         expect(browserTooltip).toBeTruthy();
 
         const dockItem = browserTooltip!.parentElement;
@@ -135,7 +135,12 @@ describe('Taskbar', () => {
         render(<Taskbar />);
 
         // Terminal text appears in TopBar (text-sm) and Dock Tooltip (text-xs)
-        const dockTooltip = screen.getAllByText('Terminal').find(el => el.classList.contains('text-xs'));
+        // Also: When window is open, activeAppTitle in TopBar uses translation key `apps.${appType}` which is `apps.terminal`
+        // So `apps.terminal` should be present multiple times?
+        // Let's check TopBar logic: activeAppTitle = t(`apps.${activeWindow.appType}`)
+        // Dock tooltip: t(`apps.${appType}`)
+
+        const dockTooltip = screen.getAllByText('apps.terminal').find(el => el.classList.contains('text-xs'));
         expect(dockTooltip).toBeInTheDocument();
 
         // Close it
@@ -152,14 +157,14 @@ describe('Taskbar', () => {
         // Note: queryAllByText might return elements that were there.
         // We expect NO element with 'Terminal' AND class 'text-xs'.
 
-        const dockTooltipAfter = screen.queryAllByText('Terminal').find(el => el.classList.contains('text-xs'));
+        const dockTooltipAfter = screen.queryAllByText('apps.terminal').find(el => el.classList.contains('text-xs'));
         expect(dockTooltipAfter).toBeUndefined();
     });
 
     it('opens Applications Menu', () => {
         render(<Taskbar />);
 
-        const appsTooltip = screen.getAllByText('Applications').find(el => el.classList.contains('text-xs'));
+        const appsTooltip = screen.getAllByText('system.applications').find(el => el.classList.contains('text-xs'));
         const dockItem = appsTooltip!.parentElement;
 
         fireEvent.click(dockItem!);
