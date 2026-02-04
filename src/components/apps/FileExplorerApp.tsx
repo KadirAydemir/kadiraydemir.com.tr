@@ -1,4 +1,5 @@
-import { Folder, File, ChevronRight, Home, HardDrive, Monitor, Image, FileText, Code, Music, Video, FolderOpen, ArrowLeft, ArrowRight, RotateCcw, Github, Trash2, FilePlus, FolderPlus, Plus, Edit2, Trash, Lock, Terminal } from 'lucide-react';
+import { Folder, File, ChevronRight, Home, HardDrive, Monitor, Image, FileText, Code, Music, Video, FolderOpen, ArrowLeft, ArrowRight, RotateCcw, Github, Trash2, FilePlus, FolderPlus, Plus, Edit2, Trash, Lock, Terminal, Check, X as CloseIcon } from 'lucide-react';
+
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProcess } from '../../hooks/useProcess';
@@ -60,11 +61,13 @@ interface FileExplorerProps {
 export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
     const { t } = useTranslation();
     const { openCV, openWindow } = useProcess();
-    const { fileSystem, createItem, deleteItem, renameItem, restoreItem, emptyTrash } = useOSStore();
+    const { fileSystem, createItem, deleteItem, renameItem, restoreItem, emptyTrash, showAlert, showConfirm, showPrompt } = useOSStore();
     const [currentPath, setCurrentPath] = useState<string[]>(initialPath || ['home']);
     const [githubFiles, setGithubFiles] = useState<FileSystemItem[]>([]);
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number, isOpen: boolean }>({ x: 0, y: 0, isOpen: false });
     const [selectedItem, setSelectedItem] = useState<FileSystemItem | null>(null);
+    const [renamingId, setRenamingId] = useState<string | null>(null);
+    const [renameValue, setRenameValue] = useState('');
 
     useEffect(() => {
         if (initialPath) {
@@ -157,6 +160,17 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
         if (currentPath.length > 1) {
             navigateTo(currentPath.slice(0, -1));
         }
+    };
+
+    const handleRenameSubmit = async (id: string) => {
+        if (renameValue.trim() && renameValue.trim() !== selectedItem?.name) {
+            await renameItem(id, renameValue.trim());
+        }
+        setRenamingId(null);
+    };
+
+    const handleRenameCancel = () => {
+        setRenamingId(null);
     };
 
     const handleDoubleClick = (item: FileSystemItem) => {
@@ -259,10 +273,11 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
                 disabled: selectedItem.isSystem,
                 onClick: () => {
                     if (selectedItem.isSystem) return;
-                    const newName = prompt('Enter new name:', selectedItem.name);
-                    if (newName) renameItem(selectedItem.id, newName);
+                    setRenamingId(selectedItem.id);
+                    setRenameValue(selectedItem.name);
                 }
             });
+
 
             items.push({
                 label: isInTrash ? t('fileExplorer.deletePermanently', 'Delete Permanently') : t('fileExplorer.delete', 'Delete'),
@@ -270,9 +285,16 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
                 divider: true,
                 danger: !selectedItem.isSystem,
                 disabled: selectedItem.isSystem,
-                onClick: () => {
+                onClick: async () => {
                     if (selectedItem.isSystem) return;
-                    if (isInTrash && !confirm(t('fileExplorer.confirmPermanentDelete', 'Are you sure you want to permanently delete this item?'))) return;
+                    if (isInTrash) {
+                        const confirmed = await showConfirm(
+                            t('fileExplorer.deletePermanently', 'Delete Permanently'),
+                            t('fileExplorer.confirmPermanentDelete', 'Are you sure you want to permanently delete this item?'),
+                            t('fileExplorer.deletePermanently', 'Delete Permanently')
+                        );
+                        if (!confirmed) return;
+                    }
                     deleteItem(selectedItem.id);
                 }
             });
@@ -282,8 +304,12 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
                     label: t('fileExplorer.emptyTrash', 'Empty Trash'),
                     icon: <Trash2 size={16} />,
                     danger: true,
-                    onClick: () => {
-                        if (confirm(t('fileExplorer.confirmEmptyTrash', 'Are you sure you want to empty the trash?'))) {
+                    onClick: async () => {
+                        const confirmed = await showConfirm(
+                            t('fileExplorer.emptyTrash', 'Empty Trash'),
+                            t('fileExplorer.confirmEmptyTrash', 'Are you sure you want to empty the trash?')
+                        );
+                        if (confirmed) {
                             emptyTrash();
                         }
                     }
@@ -319,8 +345,12 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
                     label: t('fileExplorer.emptyTrash', 'Empty Trash'),
                     icon: <Trash2 size={16} />,
                     danger: true,
-                    onClick: () => {
-                        if (confirm(t('fileExplorer.confirmEmptyTrash', 'Are you sure you want to empty the trash?'))) {
+                    onClick: async () => {
+                        const confirmed = await showConfirm(
+                            t('fileExplorer.emptyTrash', 'Empty Trash'),
+                            t('fileExplorer.confirmEmptyTrash', 'Are you sure you want to empty the trash?')
+                        );
+                        if (confirmed) {
                             emptyTrash();
                         }
                     }
@@ -454,15 +484,34 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
                                             )}
                                         </div>
                                         <div className="relative w-full flex flex-col items-center">
-                                            <span className="text-xs text-center text-gray-700 line-clamp-2 w-full break-all">
-                                                {item.name}
-                                            </span>
+                                            {renamingId === item.id ? (
+                                                <div className="flex flex-col items-center gap-1 w-full" onClick={(e) => e.stopPropagation()}>
+                                                    <input
+                                                        type="text"
+                                                        value={renameValue}
+                                                        onChange={(e) => setRenameValue(e.target.value)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') handleRenameSubmit(item.id);
+                                                            if (e.key === 'Escape') handleRenameCancel();
+                                                        }}
+                                                        onBlur={() => handleRenameSubmit(item.id)}
+                                                        className="text-xs text-center text-gray-800 bg-white border border-ubuntu-orange rounded px-1 w-full outline-none"
+                                                        autoFocus
+                                                        onFocus={(e) => e.target.select()}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-center text-gray-700 line-clamp-2 w-full break-all">
+                                                    {item.name}
+                                                </span>
+                                            )}
                                             {item.isSystem && (
                                                 <div className="absolute -top-10 -right-2 bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
                                                     <Lock size={10} className="text-gray-400" />
                                                 </div>
                                             )}
                                         </div>
+
                                     </button>
                                 ))}
                             </div>

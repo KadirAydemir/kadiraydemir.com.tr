@@ -28,12 +28,25 @@ export interface WindowState {
     params?: any;
 }
 
+export type DialogType = 'alert' | 'confirm' | 'prompt';
+
+export interface DialogState {
+    type: DialogType;
+    title: string;
+    message: string;
+    defaultValue?: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    resolve: (value: any) => void;
+}
+
 export interface OSState {
     bootState: BootState;
     windows: WindowState[];
     activeWindowId: string | null;
     cookieConsent: boolean | null;
     fileSystem: FileSystemItem;
+    dialog: DialogState | null;
 
     setBootState: (state: BootState) => void;
     setCookieConsent: (consent: boolean) => void;
@@ -49,9 +62,15 @@ export interface OSState {
 
     // File System Actions
     createItem: (parentId: string, item: Partial<FileSystemItem>) => void;
-    deleteItem: (id: string) => void;
+    deleteItem: (id: string) => Promise<void>;
     restoreItem: (id: string) => void;
     emptyTrash: () => void;
     updateFileContent: (id: string, content: string) => void;
-    renameItem: (id: string, newName: string) => void;
+    renameItem: (id: string, newName: string) => Promise<void>;
+
+    // Dialog Actions
+    showAlert: (title: string, message: string) => Promise<boolean>;
+    showConfirm: (title: string, message: string, confirmLabel?: string, cancelLabel?: string) => Promise<boolean>;
+    showPrompt: (title: string, message: string, defaultValue?: string) => Promise<string | null>;
+    closeDialog: (value?: any) => void;
 }

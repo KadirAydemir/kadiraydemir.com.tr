@@ -26,7 +26,7 @@ const BOOT_LOGS = [
 ];
 
 export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
-    const { fileSystem, createItem, updateFileContent, deleteItem, renameItem } = useOSStore();
+    const { fileSystem, createItem, updateFileContent, deleteItem, renameItem, showConfirm } = useOSStore();
     const [history, setHistory] = useState<CommandHistory[]>([]);
     const [input, setInput] = useState('');
     const [currentPath, setCurrentPath] = useState<string[]>(initialPath);
@@ -329,9 +329,15 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
         setEditorContent('');
     };
 
-    const handleCancel = () => {
-        if (isModified && !confirm('Discard unsaved changes?')) {
-            return;
+    const handleCancel = async () => {
+        if (isModified) {
+            const confirmed = await showConfirm(
+                'GNU nano',
+                'Discard unsaved changes?',
+                'Discard',
+                'Cancel'
+            );
+            if (!confirmed) return;
         }
         setEditingFile(null);
         setEditorContent('');

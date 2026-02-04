@@ -189,5 +189,12 @@
     "save": "Kaydet",
     "unsaved": "Kaydedilmemiş değişiklikler",
     "placeholder": "Yazmaya başlayın..."
+  },
+  "common": {
+    "ok": "Tamam",
+    "cancel": "İptal",
+    "confirm": "Onayla",
+    "rename": "Yeniden Adlandır",
+    "enterNewName": "Yeni ismi girin:"
   }
 }

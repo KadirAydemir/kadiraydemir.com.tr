@@ -18,6 +18,7 @@ import { TextEditorApp } from './components/apps/TextEditorApp';
 
 import { LoginScreen } from './components/os/LoginScreen';
 import { CookieBanner } from './components/ui/CookieBanner';
+import { Dialog } from './components/ui/Dialog';
 
 function App() {
     const { bootState, windows, cookieConsent } = useOSStore();
@@ -45,6 +46,7 @@ function App() {
                 <>
                     <Taskbar />
                     <CookieBanner />
+                    <Dialog />
 
                     {/* Window Manager Layer */}
                     <AnimatePresence>

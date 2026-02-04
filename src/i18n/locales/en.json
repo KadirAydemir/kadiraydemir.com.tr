@@ -189,5 +189,12 @@
     "save": "Save",
     "unsaved": "Unsaved changes",
     "placeholder": "Start typing..."
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "rename": "Rename",
+    "enterNewName": "Enter new name:"
   }
 }

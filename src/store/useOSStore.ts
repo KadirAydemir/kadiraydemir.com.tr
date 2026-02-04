@@ -127,11 +127,63 @@ export const useOSStore = create<OSState>((set, get) => ({
     })(),
     fileSystem: getInitialFileSystem(),
 
+    dialog: null,
+
     setBootState: (state: BootState) => set({ bootState: state }),
 
     setCookieConsent: (consent: boolean) => {
         safeStorage.setItem('cookie-consent', consent.toString());
         set({ cookieConsent: consent });
+    },
+
+    showAlert: (title, message) => {
+        return new Promise((resolve) => {
+            set({
+                dialog: {
+                    type: 'alert',
+                    title,
+                    message,
+                    resolve,
+                }
+            });
+        });
+    },
+
+    showConfirm: (title, message, confirmLabel, cancelLabel) => {
+        return new Promise((resolve) => {
+            set({
+                dialog: {
+                    type: 'confirm',
+                    title,
+                    message,
+                    confirmLabel,
+                    cancelLabel,
+                    resolve,
+                }
+            });
+        });
+    },
+
+    showPrompt: (title, message, defaultValue) => {
+        return new Promise((resolve) => {
+            set({
+                dialog: {
+                    type: 'prompt',
+                    title,
+                    message,
+                    defaultValue,
+                    resolve,
+                }
+            });
+        });
+    },
+
+    closeDialog: (value) => {
+        const { dialog } = get();
+        if (dialog) {
+            dialog.resolve(value);
+            set({ dialog: null });
+        }
     },
 
     openWindow: (appType: AppType, title: string, params?: any) => {
@@ -349,7 +401,7 @@ export const useOSStore = create<OSState>((set, get) => ({
         saveFileSystem(newFs);
     },
 
-    deleteItem: (id: string) => {
+    deleteItem: async (id: string) => {
         const { fileSystem } = get();
 
         // Helper to find item 
@@ -380,9 +432,10 @@ export const useOSStore = create<OSState>((set, get) => ({
         if (!itemToDelete) return;
 
         if (itemToDelete.isSystem) {
-            alert('System Error: This item is protected. Administrator privileges are required to delete system files.');
+            await get().showAlert('System Error', 'This item is protected. Administrator privileges are required to delete system files.');
             return;
         }
+
 
         const parent = findParent(fileSystem, id);
         if (!parent) return;
@@ -538,7 +591,7 @@ export const useOSStore = create<OSState>((set, get) => ({
         saveFileSystem(newFs);
     },
 
-    renameItem: (id: string, newName: string) => {
+    renameItem: async (id: string, newName: string) => {
         const { fileSystem } = get();
 
         // Helper to find item and check if it's a system item
@@ -553,9 +606,10 @@ export const useOSStore = create<OSState>((set, get) => ({
         };
 
         if (findAndCheckSystem(fileSystem)) {
-            alert('System Error: Administrator privileges are required to rename system files.');
+            await get().showAlert('System Error', 'Administrator privileges are required to rename system files.');
             return;
         }
+
 
         // Helper to find parent and check for collision
         const findParentAndCheckCollision = (node: FileSystemItem): { parent: FileSystemItem | null, collision: boolean } => {
@@ -578,9 +632,10 @@ export const useOSStore = create<OSState>((set, get) => ({
         const { parent, collision } = findParentAndCheckCollision(fileSystem);
 
         if (collision) {
-            alert('A file or folder with this name already exists in this location.');
+            await get().showAlert('Name Collision', 'A file or folder with this name already exists in this location.');
             return;
         }
+
 
         const updateTree = (node: FileSystemItem): FileSystemItem => {
             if (node.id === id) {

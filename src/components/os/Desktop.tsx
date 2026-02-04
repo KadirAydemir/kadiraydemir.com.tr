@@ -14,12 +14,19 @@ interface DesktopIconProps {
     item: FileSystemItem;
     onClick: () => void;
     onContextMenu?: (e: React.MouseEvent) => void;
+    isRenaming?: boolean;
+    renameValue?: string;
+    onRenameChange?: (value: string) => void;
+    onRenameSubmit?: () => void;
+    onRenameCancel?: () => void;
 }
 
-const DesktopIcon = ({ item, onClick, onContextMenu }: DesktopIconProps) => {
+
+const DesktopIcon = ({ item, onClick, onContextMenu, isRenaming, renameValue, onRenameChange, onRenameSubmit, onRenameCancel }: DesktopIconProps) => {
     const isMobile = useIsMobile();
 
     const handleAction = () => {
+        if (isRenaming) return;
         onClick();
     };
 
@@ -47,7 +54,7 @@ const DesktopIcon = ({ item, onClick, onContextMenu }: DesktopIconProps) => {
                     onContextMenu(e);
                 }
             }}
-            className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white/10 hover:backdrop-blur-sm transition-colors group w-24 text-center cursor-default"
+            className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors group w-24 text-center cursor-default ${isRenaming ? '' : 'hover:bg-white/10 hover:backdrop-blur-sm'}`}
         >
             <div className={`p-3 rounded-xl shadow-lg group-hover:scale-105 transition-transform relative ${item.type === 'folder' ? 'bg-ubuntu-orange/90' : 'bg-gray-600/90'}`}>
                 <div className="text-white">
@@ -59,17 +66,39 @@ const DesktopIcon = ({ item, onClick, onContextMenu }: DesktopIconProps) => {
                     </div>
                 )}
             </div>
-            <span className="text-white text-xs font-ubuntu drop-shadow-md bg-black/30 px-2 py-0.5 rounded-lg break-words line-clamp-2 w-full">{item.name}</span>
+            {isRenaming ? (
+                <div className="w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+                    <input
+                        type="text"
+                        value={renameValue}
+                        onChange={(e) => onRenameChange?.(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') onRenameSubmit?.();
+                            if (e.key === 'Escape') onRenameCancel?.();
+                        }}
+                        onBlur={onRenameSubmit}
+                        className="text-xs text-center text-white bg-ubuntu-orange/80 border border-white/50 rounded-lg px-2 py-0.5 w-full outline-none focus:ring-1 focus:ring-white shadow-lg"
+                        autoFocus
+                        onFocus={(e) => e.target.select()}
+                    />
+                </div>
+            ) : (
+                <span className="text-white text-xs font-ubuntu drop-shadow-md bg-black/30 px-2 py-0.5 rounded-lg break-words line-clamp-2 w-full">{item.name}</span>
+            )}
         </button>
     );
 };
 
+
 export const Desktop = () => {
     const { openCV, openExplorer, openWindow } = useProcess();
-    const { deselectAll, fileSystem, createItem, deleteItem, renameItem, restoreItem, emptyTrash } = useOSStore();
+    const { deselectAll, fileSystem, createItem, deleteItem, renameItem, restoreItem, emptyTrash, showConfirm, showPrompt } = useOSStore();
     const { t } = useTranslation();
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number, isOpen: boolean }>({ x: 0, y: 0, isOpen: false });
     const [selectedItem, setSelectedItem] = useState<FileSystemItem | null>(null);
+    const [renamingId, setRenamingId] = useState<string | null>(null);
+    const [renameValue, setRenameValue] = useState('');
+
 
     const desktopFolder = fileSystem.children?.find(item => item.id === 'desktop');
     const desktopItems = desktopFolder?.children || [];
@@ -83,6 +112,7 @@ export const Desktop = () => {
     };
 
     const handleItemClick = (item: FileSystemItem) => {
+        if (renamingId) return;
         if (item.type === 'folder') {
             openExplorer({ path: ['home', 'desktop', item.id] });
         } else if (item.extension === 'pdf') {
@@ -91,6 +121,18 @@ export const Desktop = () => {
             openWindow('editor', item.name, { fileId: item.id });
         }
     };
+
+    const handleRenameSubmit = async () => {
+        if (selectedItem && renameValue.trim() && renameValue.trim() !== selectedItem.name) {
+            await renameItem(selectedItem.id, renameValue.trim());
+        }
+        setRenamingId(null);
+    };
+
+    const handleRenameCancel = () => {
+        setRenamingId(null);
+    };
+
 
     const menuItems: ContextMenuItem[] = (() => {
         const items: ContextMenuItem[] = [];
@@ -107,8 +149,12 @@ export const Desktop = () => {
                     label: t('fileExplorer.emptyTrash', 'Empty Trash'),
                     icon: <Trash2 size={16} />,
                     danger: true,
-                    onClick: () => {
-                        if (confirm(t('fileExplorer.confirmEmptyTrash', 'Are you sure you want to empty the trash?'))) {
+                    onClick: async () => {
+                        const confirmed = await showConfirm(
+                            t('fileExplorer.emptyTrash', 'Empty Trash'),
+                            t('fileExplorer.confirmEmptyTrash', 'Are you sure you want to empty the trash?')
+                        );
+                        if (confirmed) {
                             emptyTrash();
                         }
                     }
@@ -128,10 +174,11 @@ export const Desktop = () => {
                     disabled: selectedItem.isSystem,
                     onClick: () => {
                         if (selectedItem.isSystem) return;
-                        const newName = prompt('Enter new name:', selectedItem.name);
-                        if (newName) renameItem(selectedItem.id, newName);
+                        setRenamingId(selectedItem.id);
+                        setRenameValue(selectedItem.name);
                     }
                 });
+
 
                 items.push({
                     label: selectedItem.originalParentId ? t('fileExplorer.deletePermanently', 'Delete Permanently') : t('fileExplorer.delete', 'Delete'),
@@ -139,9 +186,16 @@ export const Desktop = () => {
                     divider: true,
                     danger: !selectedItem.isSystem,
                     disabled: selectedItem.isSystem,
-                    onClick: () => {
+                    onClick: async () => {
                         if (selectedItem.isSystem) return;
-                        if (selectedItem.originalParentId && !confirm(t('fileExplorer.confirmPermanentDelete', 'Are you sure you want to permanently delete this item?'))) return;
+                        if (selectedItem.originalParentId) {
+                            const confirmed = await showConfirm(
+                                t('fileExplorer.deletePermanently', 'Delete Permanently'),
+                                t('fileExplorer.confirmPermanentDelete', 'Are you sure you want to permanently delete this item?'),
+                                t('fileExplorer.deletePermanently', 'Delete Permanently')
+                            );
+                            if (!confirmed) return;
+                        }
                         deleteItem(selectedItem.id);
                     }
                 });
@@ -188,13 +242,24 @@ export const Desktop = () => {
                 item={{ id: 'cv-pdf', name: 'Kadir_CV.pdf', type: 'file', extension: 'pdf', modified: '', isSystem: true }}
                 onClick={openCV}
                 onContextMenu={(e) => handleContextMenu(e, { id: 'cv-pdf', name: 'Kadir_CV.pdf', type: 'file', extension: 'pdf', modified: '', isSystem: true })}
+                isRenaming={renamingId === 'cv-pdf'}
+                renameValue={renameValue}
+                onRenameChange={setRenameValue}
+                onRenameSubmit={handleRenameSubmit}
+                onRenameCancel={handleRenameCancel}
             />
 
             <DesktopIcon
                 item={{ id: 'projects', name: 'Projects', type: 'folder', modified: '', isSystem: true }}
                 onClick={() => openExplorer({ path: ['home', 'desktop', 'projects'] })}
                 onContextMenu={(e) => handleContextMenu(e, { id: 'projects', name: 'Projects', type: 'folder', modified: '', isSystem: true })}
+                isRenaming={renamingId === 'projects'}
+                renameValue={renameValue}
+                onRenameChange={setRenameValue}
+                onRenameSubmit={handleRenameSubmit}
+                onRenameCancel={handleRenameCancel}
             />
+
 
             {/* Dynamic Items from File System */}
             {desktopItems
@@ -205,7 +270,13 @@ export const Desktop = () => {
                         item={item}
                         onClick={() => handleItemClick(item)}
                         onContextMenu={(e) => handleContextMenu(e, item)}
+                        isRenaming={renamingId === item.id}
+                        renameValue={renameValue}
+                        onRenameChange={setRenameValue}
+                        onRenameSubmit={handleRenameSubmit}
+                        onRenameCancel={handleRenameCancel}
                     />
+
                 ))}
 
             {/* Trash icon - Positioned at the bottom right */}
