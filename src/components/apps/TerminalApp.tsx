@@ -18,9 +18,9 @@ const BOOT_LOGS = [
     "Login incorrect? No, you're already logged in as root.",
     `Welcome to Kadir OS 1.0.0 (GNU/Linux 5.15.0-generic x86_64)`,
     "",
-    " * Documentation:  https://kadir.dev/docs",
-    " * Portfolio:      https://kadir.dev",
-    " * Contact:        contact@kadir.dev",
+    " * Documentation:  https://github.com/KadirAydemir/kadiraydemir.com.tr",
+    " * Portfolio:      https://kadiraydemir.com.tr",
+    " * Contact:        mail@kadiraydemir.com.tr",
     "",
     "Last login: Mon Feb 13 10:00:22 2026 from 192.168.1.5",
 ];
