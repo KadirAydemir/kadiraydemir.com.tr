@@ -10,7 +10,8 @@
     "htop": "Htop",
     "about": "Sistem Bilgisi",
     "explorer": "Dosyalar",
-    "projects": "Projeler"
+    "projects": "Projeler",
+    "trash": "Çöp Kutusu"
   },
   "projects": {
     "loading": "GitHub projeleri yükleniyor...",
@@ -165,7 +166,28 @@
       "downloads": "İndirilenler",
       "music": "Müzik",
       "pictures": "Resimler",
-      "videos": "Videolar"
-    }
+      "videos": "Videolar",
+      "projects": "Projeler",
+      "trash": "Çöp Kutusu"
+    },
+    "open": "Aç",
+    "rename": "Yeniden Adlandır",
+    "delete": "Sil",
+    "refresh": "Yenile",
+    "restore": "Geri Yükle",
+    "deletePermanently": "Kalıcı Olarak Sil",
+    "emptyTrash": "Çöpü Boşalt",
+    "confirmPermanentDelete": "Bu öğeyi kalıcı olarak silmek istediğinize emin misiniz?",
+    "confirmEmptyTrash": "Çöp kutusunu boşaltmak istediğinize emin misiniz?"
+  },
+  "desktop": {
+    "newFolder": "Yeni Klasör",
+    "newTextFile": "Yeni Metin Belgesi",
+    "openTerminal": "Terminalde Aç"
+  },
+  "editor": {
+    "save": "Kaydet",
+    "unsaved": "Kaydedilmemiş değişiklikler",
+    "placeholder": "Yazmaya başlayın..."
   }
 }

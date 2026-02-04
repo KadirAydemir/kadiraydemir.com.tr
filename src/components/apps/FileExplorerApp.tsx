@@ -1,22 +1,11 @@
-import { Folder, File, ChevronRight, Home, HardDrive, Monitor, Image, FileText, Code, Music, Video, FolderOpen, ArrowLeft, ArrowRight, RotateCcw, Github } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Folder, File, ChevronRight, Home, HardDrive, Monitor, Image, FileText, Code, Music, Video, FolderOpen, ArrowLeft, ArrowRight, RotateCcw, Github, Trash2, FilePlus, FolderPlus, Plus, Edit2, Trash, Lock, Terminal } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProcess } from '../../hooks/useProcess';
 import { useIsMobile } from '../../hooks/useIsMobile';
-
-interface FileSystemItem {
-    id: string;
-    name: string;
-    type: 'file' | 'folder';
-    icon?: React.ReactNode;
-    extension?: string;
-    size?: string;
-    modified?: string;
-    children?: FileSystemItem[];
-    url?: string;
-}
-
-// ... (keep getFileIcon lines 17-46) - wait, I'm replacing lines 6-146, so I need to include getFileIcon and mockFileSystem.
+import { useOSStore } from '../../store/useOSStore';
+import { FileSystemItem } from '../../types/os';
+import { ContextMenu, ContextMenuItem } from '../ui/ContextMenu';
 
 const getFileIcon = (extension?: string) => {
     switch (extension) {
@@ -51,93 +40,13 @@ const getFileIcon = (extension?: string) => {
     }
 };
 
-const mockFileSystem: FileSystemItem = {
-    id: 'home',
-    name: 'Home',
-    type: 'folder',
-    children: [
-        {
-            id: 'desktop',
-            name: 'Desktop',
-            type: 'folder',
-            children: [
-                { id: 'cv-pdf', name: 'Kadir_CV.pdf', type: 'file', extension: 'pdf', size: '245 KB', modified: '2026-01-15' },
-                { id: 'projects', name: 'Projects', type: 'folder', children: [] } // This will be handled by the special case for projects
-            ]
-        },
-        {
-            id: 'documents',
-            name: 'Documents',
-            type: 'folder',
-            children: [
-                { id: 'notes', name: 'notes.txt', type: 'file', extension: 'txt', size: '12 KB', modified: '2026-01-10' },
-            ]
-        },
-        {
-            id: 'projects',
-            name: 'Projects',
-            type: 'folder',
-            children: [
-                {
-                    id: 'web-os-portfolio', name: 'web-os-portfolio', type: 'folder', children: [
-                        {
-                            id: 'src', name: 'src', type: 'folder', children: [
-                                { id: 'app-tsx', name: 'App.tsx', type: 'file', extension: 'tsx', size: '3 KB', modified: '2026-02-04' },
-                                { id: 'main-tsx', name: 'main.tsx', type: 'file', extension: 'tsx', size: '1 KB', modified: '2026-02-04' },
-                            ]
-                        },
-                        { id: 'package-json', name: 'package.json', type: 'file', extension: 'json', size: '2 KB', modified: '2026-02-04' },
-                    ]
-                },
-            ]
-        },
-        {
-            id: 'downloads',
-            name: 'Downloads',
-            type: 'folder',
-            children: [
-                { id: 'installer', name: 'vscode-installer.deb', type: 'file', extension: 'deb', size: '89 MB', modified: '2026-01-25' },
-                { id: 'wallpaper', name: 'ubuntu-wallpaper.png', type: 'file', extension: 'png', size: '5 MB', modified: '2026-01-22' },
-            ]
-        },
-        {
-            id: 'music',
-            name: 'Music',
-            type: 'folder',
-            children: [
-                { id: 'song1', name: 'ambient-coding.mp3', type: 'file', extension: 'mp3', size: '8 MB', modified: '2025-12-15' },
-            ]
-        },
-        {
-            id: 'pictures',
-            name: 'Pictures',
-            type: 'folder',
-            children: [
-                {
-                    id: 'screenshots', name: 'Screenshots', type: 'folder', children: [
-                        { id: 'ss1', name: 'screenshot-2026-01-01.png', type: 'file', extension: 'png', size: '2 MB', modified: '2026-01-01' },
-                    ]
-                },
-                { id: 'profile', name: 'profile.jpg', type: 'file', extension: 'jpg', size: '1 MB', modified: '2025-11-20' },
-            ]
-        },
-        {
-            id: 'videos',
-            name: 'Videos',
-            type: 'folder',
-            children: [
-                { id: 'demo', name: 'portfolio-demo.mp4', type: 'file', extension: 'mp4', size: '150 MB', modified: '2026-02-01' },
-            ]
-        }
-    ]
-};
-
 const quickAccess = [
     { id: 'home', name: 'Home', icon: <Home size={18} /> },
     { id: 'desktop', name: 'Desktop', icon: <Monitor size={18} /> },
     { id: 'documents', name: 'Documents', icon: <Folder size={18} /> },
     { id: 'projects', name: 'Projects', icon: <Folder size={18} /> },
     { id: 'downloads', name: 'Downloads', icon: <Folder size={18} /> },
+    { id: 'trash', name: 'Trash', icon: <Trash2 size={18} /> },
 ];
 
 const drives = [
@@ -150,9 +59,12 @@ interface FileExplorerProps {
 
 export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
     const { t } = useTranslation();
-    const { openCV } = useProcess();
+    const { openCV, openWindow } = useProcess();
+    const { fileSystem, createItem, deleteItem, renameItem, restoreItem, emptyTrash } = useOSStore();
     const [currentPath, setCurrentPath] = useState<string[]>(initialPath || ['home']);
     const [githubFiles, setGithubFiles] = useState<FileSystemItem[]>([]);
+    const [contextMenu, setContextMenu] = useState<{ x: number, y: number, isOpen: boolean }>({ x: 0, y: 0, isOpen: false });
+    const [selectedItem, setSelectedItem] = useState<FileSystemItem | null>(null);
 
     useEffect(() => {
         if (initialPath) {
@@ -184,36 +96,33 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
         fetchRepos();
     }, []);
 
-    const [selectedItem, setSelectedItem] = useState<FileSystemItem | null>(null);
     const [history, setHistory] = useState<string[][]>([['home']]);
     const [historyIndex, setHistoryIndex] = useState(0);
 
-    // Navigate to a folder by path array
     const navigateTo = (path: string[]) => {
         setCurrentPath(path);
         setSelectedItem(null);
-        // Add to history
         const newHistory = history.slice(0, historyIndex + 1);
         newHistory.push(path);
         setHistory(newHistory);
         setHistoryIndex(newHistory.length - 1);
     };
 
-    // Get current folder contents based on path
     const getCurrentFolder = (): FileSystemItem | null => {
-        // Special case for projects folder
-        if (currentPath.length === 2 && currentPath[0] === 'home' && currentPath[1] === 'projects') {
+        // Special case for projects folder - check the full path
+        if (currentPath.join('/') === 'home/desktop/projects') {
             return {
                 id: 'projects',
                 name: 'Projects',
                 type: 'folder',
+                modified: new Date().toISOString().split('T')[0],
                 children: githubFiles.length > 0 ? githubFiles : [
                     { id: 'loading', name: 'Loading...', type: 'file', size: '', modified: '' }
                 ]
             };
         }
 
-        let current: FileSystemItem | null = mockFileSystem;
+        let current: FileSystemItem | null = fileSystem;
         for (let i = 1; i < currentPath.length; i++) {
             const child: FileSystemItem | undefined = current?.children?.find((c: FileSystemItem) => c.id === currentPath[i]);
             if (child && child.type === 'folder') {
@@ -226,9 +135,8 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
     };
 
     const currentFolder = getCurrentFolder();
-    const items = currentFolder?.children || [];
+    const folderItems = currentFolder?.children || [];
 
-    // Navigation functions
     const goBack = () => {
         if (historyIndex > 0) {
             setHistoryIndex(historyIndex - 1);
@@ -251,65 +159,189 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
         }
     };
 
-    // Handle double-click on item
     const handleDoubleClick = (item: FileSystemItem) => {
         if (item.type === 'folder') {
-            if (item.id === 'projects' && currentPath.includes('desktop')) {
-                navigateTo(['home', 'projects']);
-            } else {
-                navigateTo([...currentPath, item.id]);
-            }
+            navigateTo([...currentPath, item.id]);
         } else if (item.url) {
             window.open(item.url, '_blank');
-        } else {
-            // Open file - for now just show CV if it's the CV file
-            if (item.id === 'cv-pdf') {
-                openCV();
-            }
+        } else if (item.extension === 'pdf') {
+            openCV();
+        } else if (item.extension === 'txt') {
+            openWindow('editor', item.name, { fileId: item.id });
         }
     };
 
-    // Handle quick access click
     const handleQuickAccess = (id: string) => {
-        if (id === 'home') {
-            navigateTo(['home']);
-        } else if (id === 'projects') {
-            navigateTo(['home', 'projects']);
-        } else if (id === 'desktop') {
-            navigateTo(['home', 'desktop']);
-        } else if (id === 'documents') {
-            navigateTo(['home', 'documents']);
-        } else if (id === 'downloads') {
-            navigateTo(['home', 'downloads']);
+        if (id === 'projects') {
+            navigateTo(['home', 'desktop', 'projects']);
+        } else {
+            navigateTo(['home', ...(id === 'home' ? [] : [id])]);
         }
     };
 
-    // Build breadcrumb from path
     const getBreadcrumb = () => {
         const crumbs: { id: string; name: string; path: string[] }[] = [];
-        let current: FileSystemItem | null = mockFileSystem;
+        let current: FileSystemItem | null = fileSystem;
+
         for (let i = 0; i < currentPath.length; i++) {
+            const segment = currentPath[i];
+            const path = currentPath.slice(0, i + 1);
+
+            // Try to find the item in the filesystem tree to get its real name
+            let child: FileSystemItem | undefined;
             if (i === 0) {
-                crumbs.push({ id: 'home', name: 'Home', path: ['home'] });
+                child = fileSystem;
+            } else if (current) {
+                child = current.children?.find((c: FileSystemItem) => c.id === segment);
+            }
+
+            // Determine the name: Translation -> FileSystem Name -> Capitalized ID
+            const translatedName = t(`fileExplorer.folders.${segment}`, '');
+            const name = translatedName !== `fileExplorer.folders.${segment}` && translatedName !== ''
+                ? translatedName
+                : (child?.name || segment.charAt(0).toUpperCase() + segment.slice(1));
+
+            crumbs.push({ id: segment, name, path });
+
+            // Move deeper into the tree if possible
+            if (child && child.type === 'folder') {
+                current = child;
             } else {
-                const child: FileSystemItem | undefined = current?.children?.find((c: FileSystemItem) => c.id === currentPath[i]);
-                if (child) {
-                    crumbs.push({ id: child.id, name: child.name, path: currentPath.slice(0, i + 1) });
-                    if (child.type === 'folder') {
-                        current = child;
-                    }
-                }
+                current = null;
             }
         }
         return crumbs;
     };
 
     const breadcrumbs = getBreadcrumb();
-
     const isMobile = useIsMobile();
+
+    const handleContextMenu = (e: React.MouseEvent, item?: FileSystemItem) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (item) setSelectedItem(item);
+        setContextMenu({ x: e.clientX, y: e.clientY, isOpen: true });
+    };
+
+    const menuItems = (() => {
+        const isInTrash = currentPath.includes('trash');
+        const items: ContextMenuItem[] = [];
+
+        if (selectedItem) {
+            items.push({
+                label: t('fileExplorer.open', 'Open'),
+                icon: <FolderOpen size={16} />,
+                onClick: () => handleDoubleClick(selectedItem)
+            });
+
+            if (selectedItem.type === 'folder') {
+                items.push({
+                    label: t('desktop.openTerminal', 'Open in Terminal'),
+                    icon: <Terminal size={16} />,
+                    onClick: () => {
+                        const targetPath = [...currentPath, selectedItem.id];
+                        openWindow('terminal', 'Terminal', { path: targetPath });
+                    }
+                });
+            }
+
+            if (isInTrash && selectedItem.originalParentId) {
+                items.push({
+                    label: t('fileExplorer.restore', 'Restore'),
+                    icon: <RotateCcw size={16} />,
+                    onClick: () => restoreItem(selectedItem.id)
+                });
+            }
+
+            items.push({
+                label: t('fileExplorer.rename', 'Rename'),
+                icon: <Edit2 size={16} />,
+                disabled: selectedItem.isSystem,
+                onClick: () => {
+                    if (selectedItem.isSystem) return;
+                    const newName = prompt('Enter new name:', selectedItem.name);
+                    if (newName) renameItem(selectedItem.id, newName);
+                }
+            });
+
+            items.push({
+                label: isInTrash ? t('fileExplorer.deletePermanently', 'Delete Permanently') : t('fileExplorer.delete', 'Delete'),
+                icon: <Trash size={16} />,
+                divider: true,
+                danger: !selectedItem.isSystem,
+                disabled: selectedItem.isSystem,
+                onClick: () => {
+                    if (selectedItem.isSystem) return;
+                    if (isInTrash && !confirm(t('fileExplorer.confirmPermanentDelete', 'Are you sure you want to permanently delete this item?'))) return;
+                    deleteItem(selectedItem.id);
+                }
+            });
+
+            if (selectedItem.id === 'trash') {
+                items.push({
+                    label: t('fileExplorer.emptyTrash', 'Empty Trash'),
+                    icon: <Trash2 size={16} />,
+                    danger: true,
+                    onClick: () => {
+                        if (confirm(t('fileExplorer.confirmEmptyTrash', 'Are you sure you want to empty the trash?'))) {
+                            emptyTrash();
+                        }
+                    }
+                });
+            }
+        } else {
+            items.push({
+                label: t('desktop.newFolder', 'New Folder'),
+                icon: <FolderPlus size={16} />,
+                onClick: () => {
+                    const parentId = currentPath[currentPath.length - 1];
+                    createItem(parentId, { name: 'New Folder', type: 'folder' });
+                }
+            });
+            items.push({
+                label: t('desktop.newTextFile', 'New Text Document'),
+                icon: <FilePlus size={16} />,
+                onClick: () => {
+                    const parentId = currentPath[currentPath.length - 1];
+                    createItem(parentId, { name: 'document.txt', type: 'file', extension: 'txt' });
+                }
+            });
+            items.push({
+                label: t('desktop.openTerminal', 'Open in Terminal'),
+                icon: <Terminal size={16} />,
+                onClick: () => {
+                    openWindow('terminal', 'Terminal', { path: currentPath });
+                }
+            });
+
+            if (isInTrash) {
+                items.push({
+                    label: t('fileExplorer.emptyTrash', 'Empty Trash'),
+                    icon: <Trash2 size={16} />,
+                    danger: true,
+                    onClick: () => {
+                        if (confirm(t('fileExplorer.confirmEmptyTrash', 'Are you sure you want to empty the trash?'))) {
+                            emptyTrash();
+                        }
+                    }
+                });
+            }
+
+            items.push({
+                label: t('fileExplorer.refresh', 'Refresh'),
+                icon: <RotateCcw size={16} />,
+                divider: true,
+                onClick: () => { }
+            });
+        }
+
+        return items;
+    })();
+
     return (
-        <div className="w-full h-full bg-white text-gray-800 flex flex-col overflow-hidden">
-            {/* Header - Navigation Bar */}
+        <div className="w-full h-full bg-white text-gray-800 flex flex-col overflow-hidden"
+            onClick={() => setSelectedItem(null)}
+            onContextMenu={(e) => handleContextMenu(e)}>
             <div className="bg-gray-100 border-b border-gray-200 p-2 flex items-center gap-2">
                 <button
                     onClick={goBack}
@@ -326,7 +358,6 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
                     <ArrowRight size={18} />
                 </button>
 
-                {/* Breadcrumb */}
                 <div className="flex-1 flex items-center bg-white rounded-lg px-3 py-1.5 border border-gray-200 min-w-0">
                     {breadcrumbs.map((crumb, index) => (
                         <div key={crumb.id} className="flex items-center min-w-0">
@@ -343,19 +374,14 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
             </div>
 
             <div className="flex flex-1 overflow-hidden">
-                {/* Sidebar */}
                 <div className="w-52 bg-gray-50 border-r border-gray-200 p-3 overflow-y-auto flex-shrink-0">
-                    {/* Quick Access */}
                     <div className="mb-4">
                         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">
                             {t('fileExplorer.quickAccess')}
                         </h3>
                         <div className="space-y-0.5">
                             {quickAccess.map((item) => {
-                                const hasMoreSpecificMatch = quickAccess.some(qa => qa.id !== 'home' && currentPath.includes(qa.id));
-                                const isActive = item.id === 'home'
-                                    ? !hasMoreSpecificMatch
-                                    : currentPath.includes(item.id);
+                                const isActive = currentPath[currentPath.length - 1] === item.id;
 
                                 return (
                                     <button
@@ -372,7 +398,6 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
                         </div>
                     </div>
 
-                    {/* Drives */}
                     <div>
                         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">
                             {t('fileExplorer.devices')}
@@ -394,54 +419,59 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
                     </div>
                 </div>
 
-                {/* Main Content */}
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    {/* File Grid/List */}
-                    <div className="flex-1 overflow-y-auto p-4">
-                        {items.length === 0 ? (
+                    <div className="flex-1 overflow-y-auto p-4" onContextMenu={(e) => handleContextMenu(e)}>
+                        {folderItems.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-gray-400">
                                 <FolderOpen size={64} className="mb-4 opacity-20" />
                                 <p className="text-lg">{t('fileExplorer.emptyFolder')}</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3">
-                                {items.map((item) => {
-                                    return (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => {
-                                                setSelectedItem(item);
-                                                if (isMobile) handleDoubleClick(item);
-                                            }}
-                                            onDoubleClick={() => {
-                                                if (!isMobile) handleDoubleClick(item);
-                                            }}
-                                            className={`flex flex-col items-center p-3 rounded-lg transition-all cursor-default hover:bg-gray-100 ${selectedItem?.id === item.id ? 'bg-ubuntu-orange/10 ring-1 ring-ubuntu-orange' : ''
-                                                }`}
-                                        >
-                                            <div className="mb-2">
-                                                {item.type === 'folder' ? (
-                                                    <Folder size={48} className="text-ubuntu-orange fill-ubuntu-orange/20" />
-                                                ) : (
-                                                    <div className="w-12 h-12 flex items-center justify-center">
-                                                        {getFileIcon(item.extension)}
-                                                    </div>
-                                                )}
-                                            </div>
+                                {folderItems.map((item) => (
+                                    <button
+                                        key={item.id}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedItem(item);
+                                            if (isMobile) handleDoubleClick(item);
+                                        }}
+                                        onDoubleClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!isMobile) handleDoubleClick(item);
+                                        }}
+                                        onContextMenu={(e) => handleContextMenu(e, item)}
+                                        className={`flex flex-col items-center p-3 rounded-lg transition-all cursor-default hover:bg-gray-100 ${selectedItem?.id === item.id ? 'bg-ubuntu-orange/10 ring-1 ring-ubuntu-orange' : ''
+                                            }`}
+                                    >
+                                        <div className="mb-2">
+                                            {item.type === 'folder' ? (
+                                                <Folder size={48} className="text-ubuntu-orange fill-ubuntu-orange/20" />
+                                            ) : (
+                                                <div className="w-12 h-12 flex items-center justify-center">
+                                                    {getFileIcon(item.extension)}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="relative w-full flex flex-col items-center">
                                             <span className="text-xs text-center text-gray-700 line-clamp-2 w-full break-all">
                                                 {item.name}
                                             </span>
-                                        </button>
-                                    );
-                                })}
+                                            {item.isSystem && (
+                                                <div className="absolute -top-10 -right-2 bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
+                                                    <Lock size={10} className="text-gray-400" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
                         )}
                     </div>
 
-                    {/* Status Bar */}
                     <div className="bg-gray-50 border-t border-gray-200 px-4 py-2 text-xs text-gray-500 flex items-center justify-between">
                         <div>
-                            {items.length} {items.length === 1 ? t('fileExplorer.item') : t('fileExplorer.items')}
+                            {folderItems.length} {folderItems.length === 1 ? t('fileExplorer.item') : t('fileExplorer.items')}
                         </div>
                         {selectedItem && (
                             <div className="flex items-center gap-4">
@@ -457,6 +487,14 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
                     </div>
                 </div>
             </div>
+
+            <ContextMenu
+                isOpen={contextMenu.isOpen}
+                x={contextMenu.x}
+                y={contextMenu.y}
+                items={menuItems}
+                onClose={() => setContextMenu({ ...contextMenu, isOpen: false })}
+            />
         </div>
     );
 };

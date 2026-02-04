@@ -10,7 +10,8 @@
     "htop": "Htop",
     "about": "System Info",
     "explorer": "Files",
-    "projects": "Projects"
+    "projects": "Projects",
+    "trash": "Trash"
   },
   "projects": {
     "loading": "Loading GitHub projects...",
@@ -165,7 +166,28 @@
       "downloads": "Downloads",
       "music": "Music",
       "pictures": "Pictures",
-      "videos": "Videos"
-    }
+      "videos": "Videos",
+      "projects": "Projects",
+      "trash": "Trash"
+    },
+    "open": "Open",
+    "rename": "Rename",
+    "delete": "Delete",
+    "refresh": "Refresh",
+    "restore": "Restore",
+    "deletePermanently": "Delete Permanently",
+    "emptyTrash": "Empty Trash",
+    "confirmPermanentDelete": "Are you sure you want to permanently delete this item?",
+    "confirmEmptyTrash": "Are you sure you want to empty the trash?"
+  },
+  "desktop": {
+    "newFolder": "New Folder",
+    "newTextFile": "New Text Document",
+    "openTerminal": "Open in Terminal"
+  },
+  "editor": {
+    "save": "Save",
+    "unsaved": "Unsaved changes",
+    "placeholder": "Start typing..."
   }
 }

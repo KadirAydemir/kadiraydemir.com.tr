@@ -14,6 +14,7 @@ import { HtopApp } from './components/apps/HtopApp';
 import { AboutApp } from './components/apps/AboutApp';
 import { FileExplorerApp } from './components/apps/FileExplorerApp';
 import { ProjectsApp } from './components/apps/ProjectsApp';
+import { TextEditorApp } from './components/apps/TextEditorApp';
 
 import { LoginScreen } from './components/os/LoginScreen';
 import { CookieBanner } from './components/ui/CookieBanner';
@@ -50,7 +51,7 @@ function App() {
                         {windows.map((win) => (
                             <WindowFrame key={win.id} window={win}>
                                 {win.appType === 'cv' && <CVApp />}
-                                {win.appType === 'terminal' && <TerminalApp />}
+                                {win.appType === 'terminal' && <TerminalApp initialPath={win.params?.path} />}
 
                                 {win.appType === 'settings' && (
                                     <div className="p-10 flex flex-col items-center justify-center h-full text-gray-500 bg-gray-100">
@@ -73,6 +74,7 @@ function App() {
 
                                 {win.appType === 'explorer' && <FileExplorerApp initialPath={win.params?.path} />}
                                 {win.appType === 'projects' && <ProjectsApp />}
+                                {win.appType === 'editor' && <TextEditorApp fileId={win.params?.fileId} />}
                             </WindowFrame>
                         ))}
                     </AnimatePresence>

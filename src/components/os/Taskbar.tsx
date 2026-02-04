@@ -143,10 +143,10 @@ export const Taskbar = () => {
             <div className="absolute bottom-0 left-0 right-0 md:top-7 md:bottom-0 md:w-16 md:right-auto h-16 md:h-auto bg-ubuntu-dock/80 backdrop-blur-md flex flex-row md:flex-col items-center px-4 md:px-0 md:py-2 gap-2 z-40 border-t md:border-t-0 md:border-r border-white/5">
                 {/* Pinned Apps - Always visible */}
                 <DockItem
-                    icon={<FileText className="text-orange-400" size={28} />}
-                    onClick={toggleCV}
-                    isOpen={isAppOpen('cv')}
-                    name={t('apps.cv')}
+                    icon={<Folder className="text-orange-300" size={28} />}
+                    onClick={toggleExplorer}
+                    isOpen={isAppOpen('explorer')}
+                    name={t('apps.explorer')}
                 />
                 <DockItem
                     icon={<Globe className="text-blue-400" size={28} />}
@@ -155,10 +155,10 @@ export const Taskbar = () => {
                     name={t('apps.browser')}
                 />
                 <DockItem
-                    icon={<Folder className="text-orange-300" size={28} />}
-                    onClick={toggleExplorer}
-                    isOpen={isAppOpen('explorer')}
-                    name={t('apps.explorer')}
+                    icon={<FileText className="text-orange-400" size={28} />}
+                    onClick={toggleCV}
+                    isOpen={isAppOpen('cv')}
+                    name={t('apps.cv')}
                 />
 
                 {/* Separator - Only show if there are non-pinned apps open */}

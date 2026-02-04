@@ -36,7 +36,11 @@ export const useProcess = () => {
     const openProjects = () => openWindow('projects', 'GitHub Projects');
     const toggleProjects = () => toggleWindow('projects', 'GitHub Projects');
 
+    const openEditor = (title: string, params?: any) => openWindow('editor', title, params);
+    const toggleEditor = (title: string) => toggleWindow('editor', title);
+
     return {
+        openWindow,
         openCV,
         toggleCV,
         openTerminal,
@@ -59,5 +63,7 @@ export const useProcess = () => {
         toggleExplorer,
         openProjects,
         toggleProjects,
+        openEditor,
+        toggleEditor,
     };
 };
