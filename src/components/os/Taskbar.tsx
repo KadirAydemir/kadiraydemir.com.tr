@@ -1,14 +1,10 @@
-import { Battery, WifiOff, Volume2, Power, Grid, FileText, Terminal, Globe, Mail, Settings, Bomb, Grid3x3, Folder } from 'lucide-react';
-import { useTime } from '../../hooks/useTime';
+import { Grid, FileText, Terminal, Globe, Mail, Settings, Bomb, Grid3x3, Folder } from 'lucide-react';
 import { useProcess } from '../../hooks/useProcess';
 import { useOSStore } from '../../store/useOSStore';
 import { ApplicationsMenu } from './ApplicationsMenu';
-import { SystemMenu } from './SystemMenu';
-import { CalendarPopup } from './CalendarPopup';
-import { LanguageSelector } from './LanguageSelector';
-import { useSystemStore } from '../../store/useSystemStore';
+import { TopBar } from './TopBar';
+import { DockItem } from './DockItem';
 import { useState, useMemo } from 'react';
-import { Wifi } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 // App icon mapping
@@ -34,81 +30,6 @@ const getAppIcon = (appType: string) => {
             return <FileText className="text-white" size={28} />;
     }
 };
-
-const TopBar = () => {
-    const { formattedTime, fullDate } = useTime();
-    const { windows, activeWindowId } = useOSStore();
-    const { isWifiOn } = useSystemStore();
-    const [isSystemMenuOpen, setIsSystemMenuOpen] = useState(false);
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const { t } = useTranslation();
-
-    const activeAppTitle = useMemo(() => {
-        if (!activeWindowId) return t('system.desktop');
-        const activeWindow = windows.find(w => w.id === activeWindowId);
-        return activeWindow ? t(`apps.${activeWindow.appType}`) : t('system.desktop');
-    }, [windows, activeWindowId, t]);
-
-    return (
-        <div className="h-7 bg-ubuntu-header flex items-center justify-between px-2 text-sm select-none z-50 absolute top-0 w-full shadow-md text-gray-200">
-            <div className="flex items-center gap-4 pl-2">
-                <span className="font-bold hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer transition-colors font-ubuntu">{t('system.activities')}</span>
-                <span className="hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer transition-colors hidden sm:block font-ubuntu">
-                    {activeAppTitle}
-                </span>
-            </div>
-
-            <div className="flex items-center gap-3 pr-1">
-                <div className="relative">
-                    <div
-                        className="flex items-center gap-1 hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer transition-colors font-ubuntu"
-                        title={fullDate}
-                        onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                    >
-                        <span>{formattedTime}</span>
-                    </div>
-                    <CalendarPopup
-                        isOpen={isCalendarOpen}
-                        onClose={() => setIsCalendarOpen(false)}
-                    />
-                </div>
-
-                <LanguageSelector />
-
-                <div
-                    data-testid="system-tray"
-                    className="flex items-center gap-2 hover:bg-white/10 px-2 py-0.5 rounded cursor-pointer transition-colors"
-                    onClick={() => setIsSystemMenuOpen(!isSystemMenuOpen)}
-                >
-                    {isWifiOn ? <Wifi size={14} /> : <WifiOff size={14} className="text-red-500" />}
-                    <Volume2 size={14} />
-                    <Battery size={14} />
-                    <Power size={14} />
-                </div>
-            </div>
-
-            <SystemMenu
-                isOpen={isSystemMenuOpen}
-                onClose={() => setIsSystemMenuOpen(false)}
-            />
-        </div>
-    );
-};
-
-const DockItem = ({ icon, onClick, isOpen, name }: { icon: React.ReactNode, onClick: () => void, isOpen?: boolean, name: string }) => (
-    <div className="relative group w-12 h-12 md:w-full md:h-auto md:aspect-square flex items-center justify-center cursor-pointer" onClick={onClick}>
-        {isOpen && (
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 md:left-0 md:top-1/2 md:-translate-y-1/2 md:translate-x-0 md:bottom-auto bg-ubuntu-orange rounded-full" />
-        )}
-        <div className="p-2.5 bg-gray-800/50 rounded-xl group-hover:bg-white/10 transition-colors">
-            {icon}
-        </div>
-        {/* Tooltip */}
-        <div className="absolute left-full ml-2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-            {name}
-        </div>
-    </div>
-);
 
 export const Taskbar = () => {
     const { toggleCV, toggleTerminal, toggleBrowser, toggleMail, toggleSettings, toggleMinesweeper, toggleSudoku, toggleExplorer } = useProcess();

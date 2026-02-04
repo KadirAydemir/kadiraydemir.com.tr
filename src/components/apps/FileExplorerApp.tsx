@@ -1,58 +1,13 @@
-import { Folder, File, ChevronRight, Home, HardDrive, Monitor, Image, FileText, Code, Music, Video, FolderOpen, ArrowLeft, ArrowRight, RotateCcw, Github, Trash2, FilePlus, FolderPlus, Plus, Edit2, Trash, Lock, Terminal, Check, X as CloseIcon } from 'lucide-react';
-
-import { useState, useEffect, useCallback } from 'react';
+import { FolderOpen, RotateCcw, Trash2, Edit2, Trash, FolderPlus, FilePlus, Terminal } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProcess } from '../../hooks/useProcess';
-import { useIsMobile } from '../../hooks/useIsMobile';
 import { useOSStore } from '../../store/useOSStore';
 import { FileSystemItem } from '../../types/os';
 import { ContextMenu, ContextMenuItem } from '../ui/ContextMenu';
-
-const getFileIcon = (extension?: string) => {
-    switch (extension) {
-        case 'url':
-            return <Github size={20} className="text-gray-900" />;
-        case 'pdf':
-            return <FileText size={20} className="text-red-500" />;
-        case 'txt':
-        case 'md':
-            return <FileText size={20} className="text-gray-500" />;
-        case 'ts':
-        case 'tsx':
-        case 'js':
-        case 'jsx':
-        case 'json':
-            return <Code size={20} className="text-blue-500" />;
-        case 'png':
-        case 'jpg':
-        case 'jpeg':
-        case 'gif':
-        case 'svg':
-            return <Image size={20} className="text-purple-500" />;
-        case 'mp3':
-        case 'wav':
-            return <Music size={20} className="text-green-500" />;
-        case 'mp4':
-        case 'avi':
-        case 'mkv':
-            return <Video size={20} className="text-pink-500" />;
-        default:
-            return <File size={20} className="text-gray-400" />;
-    }
-};
-
-const quickAccess = [
-    { id: 'home', name: 'Home', icon: <Home size={18} /> },
-    { id: 'desktop', name: 'Desktop', icon: <Monitor size={18} /> },
-    { id: 'documents', name: 'Documents', icon: <Folder size={18} /> },
-    { id: 'projects', name: 'Projects', icon: <Folder size={18} /> },
-    { id: 'downloads', name: 'Downloads', icon: <Folder size={18} /> },
-    { id: 'trash', name: 'Trash', icon: <Trash2 size={18} /> },
-];
-
-const drives = [
-    { id: 'root', name: 'Computer', icon: <HardDrive size={18} />, size: '256 GB' },
-];
+import { Sidebar } from './file-explorer/Sidebar';
+import { FileGrid } from './file-explorer/FileGrid';
+import { Navigation } from './file-explorer/Navigation';
 
 interface FileExplorerProps {
     initialPath?: string[];
@@ -61,7 +16,7 @@ interface FileExplorerProps {
 export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
     const { t } = useTranslation();
     const { openCV, openWindow } = useProcess();
-    const { fileSystem, createItem, deleteItem, renameItem, restoreItem, emptyTrash, showAlert, showConfirm, showPrompt } = useOSStore();
+    const { fileSystem, createItem, deleteItem, renameItem, restoreItem, emptyTrash, showConfirm } = useOSStore();
     const [currentPath, setCurrentPath] = useState<string[]>(initialPath || ['home']);
     const [githubFiles, setGithubFiles] = useState<FileSystemItem[]>([]);
     const [contextMenu, setContextMenu] = useState<{ x: number, y: number, isOpen: boolean }>({ x: 0, y: 0, isOpen: false });
@@ -156,12 +111,6 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
         }
     };
 
-    const goUp = () => {
-        if (currentPath.length > 1) {
-            navigateTo(currentPath.slice(0, -1));
-        }
-    };
-
     const handleRenameSubmit = async (id: string) => {
         if (renameValue.trim() && renameValue.trim() !== selectedItem?.name) {
             await renameItem(id, renameValue.trim());
@@ -182,14 +131,6 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
             openCV();
         } else if (item.extension === 'txt') {
             openWindow('editor', item.name, { fileId: item.id });
-        }
-    };
-
-    const handleQuickAccess = (id: string) => {
-        if (id === 'projects') {
-            navigateTo(['home', 'desktop', 'projects']);
-        } else {
-            navigateTo(['home', ...(id === 'home' ? [] : [id])]);
         }
     };
 
@@ -228,7 +169,6 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
     };
 
     const breadcrumbs = getBreadcrumb();
-    const isMobile = useIsMobile();
 
     const handleContextMenu = (e: React.MouseEvent, item?: FileSystemItem) => {
         e.preventDefault();
@@ -372,151 +312,35 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
         <div className="w-full h-full bg-white text-gray-800 flex flex-col overflow-hidden"
             onClick={() => setSelectedItem(null)}
             onContextMenu={(e) => handleContextMenu(e)}>
-            <div className="bg-gray-100 border-b border-gray-200 p-2 flex items-center gap-2">
-                <button
-                    onClick={goBack}
-                    disabled={historyIndex === 0}
-                    className={`p-2 rounded-lg transition-colors ${historyIndex === 0 ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-200 text-gray-600'}`}
-                >
-                    <ArrowLeft size={18} />
-                </button>
-                <button
-                    onClick={goForward}
-                    disabled={historyIndex === history.length - 1}
-                    className={`p-2 rounded-lg transition-colors ${historyIndex === history.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-200 text-gray-600'}`}
-                >
-                    <ArrowRight size={18} />
-                </button>
 
-                <div className="flex-1 flex items-center bg-white rounded-lg px-3 py-1.5 border border-gray-200 min-w-0">
-                    {breadcrumbs.map((crumb, index) => (
-                        <div key={crumb.id} className="flex items-center min-w-0">
-                            {index > 0 && <ChevronRight size={14} className="text-gray-400 mx-1 flex-shrink-0" />}
-                            <button
-                                onClick={() => navigateTo(crumb.path)}
-                                className="hover:bg-gray-100 px-2 py-0.5 rounded text-sm font-medium text-gray-700 hover:text-ubuntu-orange transition-colors truncate"
-                            >
-                                {crumb.name}
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            <Navigation
+                canGoBack={historyIndex > 0}
+                canGoForward={historyIndex < history.length - 1}
+                onGoBack={goBack}
+                onGoForward={goForward}
+                breadcrumbs={breadcrumbs}
+                onNavigate={navigateTo}
+            />
 
             <div className="flex flex-1 overflow-hidden">
-                <div className="w-52 bg-gray-50 border-r border-gray-200 p-3 overflow-y-auto flex-shrink-0">
-                    <div className="mb-4">
-                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">
-                            {t('fileExplorer.quickAccess')}
-                        </h3>
-                        <div className="space-y-0.5">
-                            {quickAccess.map((item) => {
-                                const isActive = currentPath[currentPath.length - 1] === item.id;
-
-                                return (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => handleQuickAccess(item.id)}
-                                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors text-sm ${isActive ? 'bg-ubuntu-orange/10 text-ubuntu-orange font-medium' : ''
-                                            }`}
-                                    >
-                                        <span className="flex-shrink-0">{item.icon}</span>
-                                        <span className="truncate">{t(`fileExplorer.folders.${item.id}`, item.name)}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">
-                            {t('fileExplorer.devices')}
-                        </h3>
-                        <div className="space-y-0.5">
-                            {drives.map((drive) => (
-                                <button
-                                    key={drive.id}
-                                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors text-sm"
-                                >
-                                    <span className="flex-shrink-0">{drive.icon}</span>
-                                    <div className="flex-1 text-left min-w-0">
-                                        <div className="truncate">{drive.name}</div>
-                                        <div className="text-xs text-gray-500">{drive.size}</div>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+                <Sidebar
+                    currentPath={currentPath}
+                    onNavigate={navigateTo}
+                />
 
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <div className="flex-1 overflow-y-auto p-4" onContextMenu={(e) => handleContextMenu(e)}>
-                        {folderItems.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                <FolderOpen size={64} className="mb-4 opacity-20" />
-                                <p className="text-lg">{t('fileExplorer.emptyFolder')}</p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3">
-                                {folderItems.map((item) => (
-                                    <button
-                                        key={item.id}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedItem(item);
-                                            if (isMobile) handleDoubleClick(item);
-                                        }}
-                                        onDoubleClick={(e) => {
-                                            e.stopPropagation();
-                                            if (!isMobile) handleDoubleClick(item);
-                                        }}
-                                        onContextMenu={(e) => handleContextMenu(e, item)}
-                                        className={`flex flex-col items-center p-3 rounded-lg transition-all cursor-default hover:bg-gray-100 ${selectedItem?.id === item.id ? 'bg-ubuntu-orange/10 ring-1 ring-ubuntu-orange' : ''
-                                            }`}
-                                    >
-                                        <div className="mb-2">
-                                            {item.type === 'folder' ? (
-                                                <Folder size={48} className="text-ubuntu-orange fill-ubuntu-orange/20" />
-                                            ) : (
-                                                <div className="w-12 h-12 flex items-center justify-center">
-                                                    {getFileIcon(item.extension)}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="relative w-full flex flex-col items-center">
-                                            {renamingId === item.id ? (
-                                                <div className="flex flex-col items-center gap-1 w-full" onClick={(e) => e.stopPropagation()}>
-                                                    <input
-                                                        type="text"
-                                                        value={renameValue}
-                                                        onChange={(e) => setRenameValue(e.target.value)}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === 'Enter') handleRenameSubmit(item.id);
-                                                            if (e.key === 'Escape') handleRenameCancel();
-                                                        }}
-                                                        onBlur={() => handleRenameSubmit(item.id)}
-                                                        className="text-xs text-center text-gray-800 bg-white border border-ubuntu-orange rounded px-1 w-full outline-none"
-                                                        autoFocus
-                                                        onFocus={(e) => e.target.select()}
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <span className="text-xs text-center text-gray-700 line-clamp-2 w-full break-all">
-                                                    {item.name}
-                                                </span>
-                                            )}
-                                            {item.isSystem && (
-                                                <div className="absolute -top-10 -right-2 bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
-                                                    <Lock size={10} className="text-gray-400" />
-                                                </div>
-                                            )}
-                                        </div>
-
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    <FileGrid
+                        items={folderItems}
+                        selectedItem={selectedItem}
+                        onSelect={setSelectedItem}
+                        onDoubleClick={handleDoubleClick}
+                        onContextMenu={handleContextMenu}
+                        renamingId={renamingId}
+                        renameValue={renameValue}
+                        onRenameChange={setRenameValue}
+                        onRenameSubmit={handleRenameSubmit}
+                        onRenameCancel={handleRenameCancel}
+                    />
 
                     <div className="bg-gray-50 border-t border-gray-200 px-4 py-2 text-xs text-gray-500 flex items-center justify-between">
                         <div>

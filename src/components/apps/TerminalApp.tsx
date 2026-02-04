@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useOSStore } from '../../store/useOSStore';
 import { FileSystemItem } from '../../types/os';
+import { NanoEditor } from './terminal/NanoEditor';
 
 interface CommandHistory {
     command: string;
@@ -31,12 +32,9 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
     const [input, setInput] = useState('');
     const [currentPath, setCurrentPath] = useState<string[]>(initialPath);
     const [editingFile, setEditingFile] = useState<{ id: string; name: string; content: string } | null>(null);
-    const [editorContent, setEditorContent] = useState('');
-    const [isModified, setIsModified] = useState(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
-    const editorRef = useRef<HTMLTextAreaElement>(null);
     const lastInitialPathRef = useRef<string | null>(null);
 
     // Sync path if initialPath changes (e.g. opening another terminal location)
@@ -70,9 +68,7 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
 
     // Focus input on click
     const handleContainerClick = () => {
-        if (editingFile) {
-            editorRef.current?.focus();
-        } else {
+        if (!editingFile) {
             inputRef.current?.focus();
         }
     };
@@ -234,17 +230,10 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
                     } else if (existingFile) {
                         // Open existing
                         setEditingFile({ id: existingFile.id, name: existingFile.name, content: existingFile.content || '' });
-                        setEditorContent(existingFile.content || '');
                         // We don't return here, we set state. The render will change.
-                        // But we also need to clear input/history or just switch view?
-                        // Let's clear input.
-                        // We can leave history as is, so when they exit, they see where they were.
                     } else {
                         // Create new file
-                        // We'll create it on save.
-                        // For now, mockup an ID? No, we need to know it's new.
                         setEditingFile({ id: 'NEW_FILE', name: fileName, content: '' });
-                        setEditorContent('');
                     }
                 }
                 break;
@@ -304,7 +293,7 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
         setInput('');
     };
 
-    const handleSave = () => {
+    const handleSave = (content: string) => {
         if (!editingFile || !getCurrentDirectory()) return;
 
         if (editingFile.id === 'NEW_FILE') {
@@ -312,87 +301,33 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
                 name: editingFile.name,
                 type: 'file',
                 extension: editingFile.name.split('.').pop() || 'txt',
-                content: editorContent
+                content: content
             });
         } else {
-            updateFileContent(editingFile.id, editorContent);
+            updateFileContent(editingFile.id, content);
         }
 
         setHistory(prev => [...prev, {
             command: `nano ${editingFile.name}`,
-            output: `Wrote ${editorContent.trim() === '' ? 0 : editorContent.split('\n').length} lines to ${editingFile.name}`,
+            output: `Wrote ${content.trim() === '' ? 0 : content.split('\n').length} lines to ${editingFile.name}`,
             path: getPathDisplay()
         }]);
 
-        setIsModified(false);
         setEditingFile(null);
-        setEditorContent('');
     };
 
-    const handleCancel = async () => {
-        if (isModified) {
-            const confirmed = await showConfirm(
-                'GNU nano',
-                'Discard unsaved changes?',
-                'Discard',
-                'Cancel'
-            );
-            if (!confirmed) return;
-        }
+    const handleExit = () => {
         setEditingFile(null);
-        setEditorContent('');
-        setIsModified(false);
     };
 
     if (editingFile) {
         return (
-            <div className="w-full h-full bg-[#300a24] text-white font-mono flex flex-col" onClick={handleContainerClick}>
-                <div className="bg-gray-800 text-white px-2 py-1 text-sm flex justify-between items-center">
-                    <span>GNU nano 5.4</span>
-                    <span>{editingFile.name}</span>
-                    <span className={isModified ? "text-yellow-400 font-bold" : ""}>
-                        {isModified ? '[Modified]' : ''}
-                    </span>
-                </div>
-                <textarea
-                    ref={editorRef}
-                    value={editorContent}
-                    onChange={(e) => {
-                        setEditorContent(e.target.value);
-                        setIsModified(true);
-                    }}
-                    onKeyDown={(e) => {
-                        // Handle Ctrl+X (Exit)
-                        if (e.ctrlKey && e.key.toLowerCase() === 'x') {
-                            e.preventDefault();
-                            handleCancel();
-                        }
-                        // Handle Ctrl+S (Save and exit)
-                        if (e.ctrlKey && e.key.toLowerCase() === 's') {
-                            e.preventDefault();
-                            handleSave();
-                        }
-                    }}
-                    className="flex-1 bg-[#300a24] text-white p-2 border-none outline-none resize-none font-mono text-sm"
-                    autoFocus
-                />
-                <div className="bg-gray-800 text-white px-2 py-1 text-xs flex gap-4">
-                    <button
-                        onClick={handleSave}
-                        className="hover:bg-gray-700 px-2 rounded flex items-center gap-1"
-                        title="Ctrl+S (Save & Exit)"
-                    >
-                        <span className="bg-white text-gray-800 px-1 rounded-sm font-bold">^S</span> Save & Exit
-                    </button>
-                    <button
-                        onClick={handleCancel}
-                        className="hover:bg-gray-700 px-2 rounded flex items-center gap-1"
-                        title="Ctrl+X (Exit)"
-                    >
-                        <span className="bg-white text-gray-800 px-1 rounded-sm font-bold">^X</span> Exit
-                    </button>
-                </div>
-            </div>
+            <NanoEditor
+                fileName={editingFile.name}
+                initialContent={editingFile.content}
+                onSave={handleSave}
+                onExit={handleExit}
+            />
         );
     }
 
