@@ -111,8 +111,24 @@ const getInitialFileSystem = (): FileSystemItem => {
     return initialMockFileSystem;
 };
 
+let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+
 const saveFileSystem = (fs: FileSystemItem) => {
-    safeStorage.setItem('os-file-system', JSON.stringify(fs));
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+    }
+
+    saveTimeout = setTimeout(() => {
+        const save = () => {
+            safeStorage.setItem('os-file-system', JSON.stringify(fs));
+        };
+
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+            window.requestIdleCallback(save);
+        } else {
+            save();
+        }
+    }, 1000);
 };
 
 export const useOSStore = create<OSState>((set, get) => ({
