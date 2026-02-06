@@ -121,7 +121,7 @@ export const MinesweeperGame = () => {
             return grid;
         }
 
-        const newGrid = grid.map(r => r.map(c => ({ ...c })));
+        const newGrid = grid;
         const stack = [[row, col]];
 
         while (stack.length > 0) {
