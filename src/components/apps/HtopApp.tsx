@@ -46,6 +46,19 @@ const generateRandomProcess = (id: number): Process => {
     };
 };
 
+const ProgressBar = ({ label, percent, colorClass }: { label: string, percent: number, colorClass: string }) => (
+    <div className="flex items-center gap-2 font-mono text-xs mb-1">
+        <span className="w-8 text-cyan-400">{label}</span>
+        <div className="flex-1 bg-gray-700 h-3 relative">
+            <div
+                className={`h-full ${colorClass}`}
+                style={{ width: `${percent}%` }}
+            />
+        </div>
+        <span className="w-12 text-right">{percent.toFixed(1)}%</span>
+    </div>
+);
+
 export const HtopApp = () => {
     const [processes, setProcesses] = useState<Process[]>([]);
     const [cpuUsage, setCpuUsage] = useState([0, 0, 0, 0]);
@@ -75,19 +88,6 @@ export const HtopApp = () => {
 
         return () => clearInterval(interval);
     }, []);
-
-    const ProgressBar = ({ label, percent, colorClass }: { label: string, percent: number, colorClass: string }) => (
-        <div className="flex items-center gap-2 font-mono text-xs mb-1">
-            <span className="w-8 text-cyan-400">{label}</span>
-            <div className="flex-1 bg-gray-700 h-3 relative">
-                <div
-                    className={`h-full ${colorClass}`}
-                    style={{ width: `${percent}%` }}
-                />
-            </div>
-            <span className="w-12 text-right">{percent.toFixed(1)}%</span>
-        </div>
-    );
 
     return (
         <div className="w-full h-full bg-black text-white font-mono text-xs p-2 overflow-hidden flex flex-col cursor-default select-none">
