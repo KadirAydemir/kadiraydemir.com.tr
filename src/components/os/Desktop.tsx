@@ -1,4 +1,4 @@
-import { FileText, Folder, Github, Trash2, Plus, FilePlus, FolderPlus, Lock, FolderOpen, Edit2, Trash, RotateCcw } from 'lucide-react';
+import { Github, Trash2, Plus, FilePlus, FolderPlus, FolderOpen, Edit2, Trash, RotateCcw } from 'lucide-react';
 import { useProcess } from '../../hooks/useProcess';
 import { useTranslation } from 'react-i18next';
 import backgroundImage from '../../assets/wallpapers/ubuntu-bg.png';
@@ -6,89 +6,12 @@ import { motion } from 'framer-motion';
 import { useState, useCallback } from 'react';
 
 import { useOSStore } from '../../store/useOSStore';
-import { useIsMobile } from '../../hooks/useIsMobile';
 import { ContextMenu, ContextMenuItem } from '../ui/ContextMenu';
 import { FileSystemItem } from '../../types/os';
+import { DesktopIcon } from './DesktopIcon';
 
-interface DesktopIconProps {
-    item: FileSystemItem;
-    onClick: () => void;
-    onContextMenu?: (e: React.MouseEvent) => void;
-    isRenaming?: boolean;
-    renameValue?: string;
-    onRenameChange?: (value: string) => void;
-    onRenameSubmit?: () => void;
-    onRenameCancel?: () => void;
-}
-
-
-const DesktopIcon = ({ item, onClick, onContextMenu, isRenaming, renameValue, onRenameChange, onRenameSubmit, onRenameCancel }: DesktopIconProps) => {
-    const isMobile = useIsMobile();
-
-    const handleAction = () => {
-        if (isRenaming) return;
-        onClick();
-    };
-
-    const getIcon = () => {
-        if (item.type === 'folder') return <Folder size={32} />;
-        if (item.extension === 'pdf') return <FileText size={32} />;
-        if (item.extension === 'txt') return <FileText size={32} />;
-        return <FileText size={32} />;
-    };
-
-    return (
-        <button
-            onClick={(e) => {
-                e.stopPropagation();
-                if (isMobile) handleAction();
-            }}
-            onDoubleClick={(e) => {
-                e.stopPropagation();
-                if (!isMobile) handleAction();
-            }}
-            onContextMenu={(e) => {
-                if (onContextMenu) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onContextMenu(e);
-                }
-            }}
-            className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors group w-24 text-center cursor-default ${isRenaming ? '' : 'hover:bg-white/10 hover:backdrop-blur-sm'}`}
-        >
-            <div className={`p-3 rounded-xl shadow-lg group-hover:scale-105 transition-transform relative ${item.type === 'folder' ? 'bg-ubuntu-orange/90' : 'bg-gray-600/90'}`}>
-                <div className="text-white">
-                    {getIcon()}
-                </div>
-                {item.isSystem && (
-                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
-                        <Lock size={10} className="text-gray-400" />
-                    </div>
-                )}
-            </div>
-            {isRenaming ? (
-                <div className="w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-                    <input
-                        type="text"
-                        value={renameValue}
-                        onChange={(e) => onRenameChange?.(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') onRenameSubmit?.();
-                            if (e.key === 'Escape') onRenameCancel?.();
-                        }}
-                        onBlur={onRenameSubmit}
-                        className="text-xs text-center text-white bg-ubuntu-orange/80 border border-white/50 rounded-lg px-2 py-0.5 w-full outline-none focus:ring-1 focus:ring-white shadow-lg"
-                        autoFocus
-                        onFocus={(e) => e.target.select()}
-                    />
-                </div>
-            ) : (
-                <span className="text-white text-xs font-ubuntu drop-shadow-md bg-black/30 px-2 py-0.5 rounded-lg break-words line-clamp-2 w-full">{item.name}</span>
-            )}
-        </button>
-    );
-};
-
+const CV_ITEM: FileSystemItem = { id: 'cv-pdf', name: 'Kadir_CV.pdf', type: 'file', extension: 'pdf', modified: '', isSystem: true };
+const PROJECTS_ITEM: FileSystemItem = { id: 'projects', name: 'Projects', type: 'folder', modified: '', isSystem: true };
 
 export const Desktop = () => {
     const { openCV, openExplorer, openWindow } = useProcess();
@@ -103,15 +26,15 @@ export const Desktop = () => {
     const desktopFolder = fileSystem.children?.find(item => item.id === 'desktop');
     const desktopItems = desktopFolder?.children || [];
 
-    const handleContextMenu = (e: React.MouseEvent, item?: FileSystemItem) => {
+    const handleContextMenu = useCallback((e: React.MouseEvent, item?: FileSystemItem) => {
         e.preventDefault();
         e.stopPropagation();
         if (item) setSelectedItem(item);
         else setSelectedItem(null);
         setContextMenu({ x: e.clientX, y: e.clientY, isOpen: true });
-    };
+    }, []);
 
-    const handleItemClick = (item: FileSystemItem) => {
+    const handleItemClick = useCallback((item: FileSystemItem) => {
         if (renamingId) return;
         if (item.type === 'folder') {
             openExplorer({ path: ['home', 'desktop', item.id] });
@@ -120,9 +43,9 @@ export const Desktop = () => {
         } else if (item.extension === 'txt') {
             openWindow('editor', item.name, { fileId: item.id });
         }
-    };
+    }, [renamingId, openExplorer, openCV, openWindow]);
 
-    const handleRenameSubmit = async () => {
+    const handleRenameSubmit = useCallback(async () => {
         if (selectedItem && renameValue.trim()) {
             let newName = renameValue.trim();
 
@@ -135,11 +58,11 @@ export const Desktop = () => {
             }
         }
         setRenamingId(null);
-    };
+    }, [selectedItem, renameValue, renameItem]);
 
-    const handleRenameCancel = () => {
+    const handleRenameCancel = useCallback(() => {
         setRenamingId(null);
-    };
+    }, []);
 
 
     const menuItems: ContextMenuItem[] = (() => {
@@ -247,25 +170,25 @@ export const Desktop = () => {
 
             {/* System / Canonical Icons - Always visible regardless of localStorage */}
             <DesktopIcon
-                item={{ id: 'cv-pdf', name: 'Kadir_CV.pdf', type: 'file', extension: 'pdf', modified: '', isSystem: true }}
-                onClick={openCV}
-                onContextMenu={(e) => handleContextMenu(e, { id: 'cv-pdf', name: 'Kadir_CV.pdf', type: 'file', extension: 'pdf', modified: '', isSystem: true })}
+                item={CV_ITEM}
+                onIconClick={handleItemClick}
+                onIconContextMenu={handleContextMenu}
                 isRenaming={renamingId === 'cv-pdf'}
-                renameValue={renameValue}
-                onRenameChange={setRenameValue}
-                onRenameSubmit={handleRenameSubmit}
-                onRenameCancel={handleRenameCancel}
+                renameValue={renamingId === 'cv-pdf' ? renameValue : undefined}
+                onRenameChange={renamingId === 'cv-pdf' ? setRenameValue : undefined}
+                onRenameSubmit={renamingId === 'cv-pdf' ? handleRenameSubmit : undefined}
+                onRenameCancel={renamingId === 'cv-pdf' ? handleRenameCancel : undefined}
             />
 
             <DesktopIcon
-                item={{ id: 'projects', name: 'Projects', type: 'folder', modified: '', isSystem: true }}
-                onClick={() => openExplorer({ path: ['home', 'desktop', 'projects'] })}
-                onContextMenu={(e) => handleContextMenu(e, { id: 'projects', name: 'Projects', type: 'folder', modified: '', isSystem: true })}
+                item={PROJECTS_ITEM}
+                onIconClick={handleItemClick}
+                onIconContextMenu={handleContextMenu}
                 isRenaming={renamingId === 'projects'}
-                renameValue={renameValue}
-                onRenameChange={setRenameValue}
-                onRenameSubmit={handleRenameSubmit}
-                onRenameCancel={handleRenameCancel}
+                renameValue={renamingId === 'projects' ? renameValue : undefined}
+                onRenameChange={renamingId === 'projects' ? setRenameValue : undefined}
+                onRenameSubmit={renamingId === 'projects' ? handleRenameSubmit : undefined}
+                onRenameCancel={renamingId === 'projects' ? handleRenameCancel : undefined}
             />
 
 
@@ -276,13 +199,13 @@ export const Desktop = () => {
                     <DesktopIcon
                         key={item.id}
                         item={item}
-                        onClick={() => handleItemClick(item)}
-                        onContextMenu={(e) => handleContextMenu(e, item)}
+                        onIconClick={handleItemClick}
+                        onIconContextMenu={handleContextMenu}
                         isRenaming={renamingId === item.id}
-                        renameValue={renameValue}
-                        onRenameChange={setRenameValue}
-                        onRenameSubmit={handleRenameSubmit}
-                        onRenameCancel={handleRenameCancel}
+                        renameValue={renamingId === item.id ? renameValue : undefined}
+                        onRenameChange={renamingId === item.id ? setRenameValue : undefined}
+                        onRenameSubmit={renamingId === item.id ? handleRenameSubmit : undefined}
+                        onRenameCancel={renamingId === item.id ? handleRenameCancel : undefined}
                     />
 
                 ))}
