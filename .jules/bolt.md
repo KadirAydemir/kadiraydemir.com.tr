@@ -1,0 +1,3 @@
+## 2026-02-04 - Memoization of Recursive Derived State
+**Learning:** React components (like `TextEditorApp`) with controlled inputs and complex inline derived state logic (like recursive file system search) can suffer from significant performance degradation. Moving expensive computations to memoized values or external utilities prevents re-calculation on every render cycle (e.g. typing).
+**Action:** Always memoize derived state that depends on large data structures (like `fileSystem`) but rarely changes relative to the component's render frequency. Extract complex logic to pure utility functions to enable easier performance testing.

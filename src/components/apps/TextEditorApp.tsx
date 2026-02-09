@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useOSStore } from '../../store/useOSStore';
 import { useTranslation } from 'react-i18next';
 import { Save, X, FileText } from 'lucide-react';
+import { findNode } from '../../utils/fileSystem';
 
 interface TextEditorProps {
     fileId: string;
@@ -13,19 +14,8 @@ export const TextEditorApp = ({ fileId }: TextEditorProps) => {
     const [content, setContent] = useState('');
     const [isDirty, setIsDirty] = useState(false);
 
-    // Find the file in the file system
-    const findFile = (node: any): any => {
-        if (node.id === fileId) return node;
-        if (node.children) {
-            for (const child of node.children) {
-                const found = findFile(child);
-                if (found) return found;
-            }
-        }
-        return null;
-    };
-
-    const file = findFile(fileSystem);
+    // Memoize the file lookup to prevent expensive traversal on every render (e.g. when typing)
+    const file = useMemo(() => findNode(fileSystem, fileId), [fileSystem, fileId]);
 
     useEffect(() => {
         if (file) {
