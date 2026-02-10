@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useOSStore } from '../../store/useOSStore';
 import { FileSystemItem } from '../../types/os';
 import { NanoEditor } from './terminal/NanoEditor';
+import { calculatePathDisplay, resolveNode } from './terminal-utils';
 
 interface CommandHistory {
     command: string;
@@ -37,6 +38,8 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
     const bottomRef = useRef<HTMLDivElement>(null);
     const lastInitialPathRef = useRef<string | null>(null);
 
+    const pathDisplay = useMemo(() => calculatePathDisplay(fileSystem, currentPath), [fileSystem, currentPath]);
+
     // Sync path if initialPath changes (e.g. opening another terminal location)
     useEffect(() => {
         const pathKey = initialPath?.join('/');
@@ -55,7 +58,7 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
                     {BOOT_LOGS.map((line, i) => <div key={i}>{line}</div>)}
                 </div>
             ),
-            path: getPathDisplay()
+            path: calculatePathDisplay(fileSystem, currentPath)
         }]);
     }, []);
 
@@ -73,50 +76,11 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
         }
     };
 
-    const resolveNode = (currentFs: FileSystemItem, pathArr: string[]): FileSystemItem | null => {
-        let current = currentFs;
-        if (pathArr.length === 0) return null;
-        if (pathArr[0] !== current.id) return null;
-
-        for (let i = 1; i < pathArr.length; i++) {
-            const nextId = pathArr[i];
-            const found = current.children?.find(c => c.id === nextId);
-            if (found) current = found;
-            else return null;
-        }
-        return current;
-    };
-
     const getCurrentDirectory = () => resolveNode(fileSystem, currentPath);
-
-    const getPathDisplay = () => {
-        let currentNode = fileSystem;
-        const resolvedNames: string[] = [];
-
-        if (currentPath.length > 0 && currentPath[0] === fileSystem.id) {
-            resolvedNames.push('home');
-        } else {
-            resolvedNames.push('?');
-        }
-
-        for (let i = 1; i < currentPath.length; i++) {
-            const nextId = currentPath[i];
-            const child = currentNode.children?.find(c => c.id === nextId);
-            if (child) {
-                resolvedNames.push(child.name);
-                currentNode = child;
-            } else {
-                resolvedNames.push(nextId);
-            }
-        }
-
-        let pathStr = '/' + resolvedNames.join('/');
-        return pathStr.replace('/home', '/home/kadir');
-    };
 
     const handleCommand = () => {
         const cmd = input.trim();
-        const pathAtExecution = getPathDisplay();
+        const pathAtExecution = pathDisplay;
 
         if (!cmd) {
             setHistory(prev => [...prev, { command: '', output: null, path: pathAtExecution }]);
@@ -166,7 +130,7 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
                 }
                 break;
             case 'pwd':
-                output = getPathDisplay();
+                output = pathDisplay;
                 break;
             case 'cd':
                 if (!args[1] || args[1] === '~') {
@@ -310,7 +274,7 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
         setHistory(prev => [...prev, {
             command: `nano ${editingFile.name}`,
             output: `Wrote ${content.trim() === '' ? 0 : content.split('\n').length} lines to ${editingFile.name}`,
-            path: getPathDisplay()
+            path: pathDisplay
         }]);
 
         setEditingFile(null);
@@ -352,7 +316,7 @@ export const TerminalApp = ({ initialPath = ['home'] }: TerminalAppProps) => {
 
             <div className="flex gap-2">
                 <span className="text-green-500 font-bold">kadir@os:</span>
-                <span className="text-blue-400 font-bold">{getPathDisplay()}</span>
+                <span className="text-blue-400 font-bold">{pathDisplay}</span>
                 <span className="text-white">$</span>
                 <input
                     ref={inputRef}
