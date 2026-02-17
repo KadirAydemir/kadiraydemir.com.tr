@@ -1,43 +1,44 @@
+import { useCallback } from 'react';
 import { useOSStore } from '../store/useOSStore';
 
 export const useProcess = () => {
     const { openWindow, toggleWindow } = useOSStore();
 
-    const openCV = () => openWindow('cv', 'Kadir Aydemir - CV');
-    const toggleCV = () => toggleWindow('cv', 'Kadir Aydemir - CV');
+    const openCV = useCallback(() => openWindow('cv', 'Kadir Aydemir - CV'), [openWindow]);
+    const toggleCV = useCallback(() => toggleWindow('cv', 'Kadir Aydemir - CV'), [toggleWindow]);
 
-    const openTerminal = () => openWindow('terminal', 'Terminal');
-    const toggleTerminal = () => toggleWindow('terminal', 'Terminal');
+    const openTerminal = useCallback(() => openWindow('terminal', 'Terminal'), [openWindow]);
+    const toggleTerminal = useCallback(() => toggleWindow('terminal', 'Terminal'), [toggleWindow]);
 
-    const openSettings = () => openWindow('settings', 'Settings');
-    const toggleSettings = () => toggleWindow('settings', 'Settings');
+    const openSettings = useCallback(() => openWindow('settings', 'Settings'), [openWindow]);
+    const toggleSettings = useCallback(() => toggleWindow('settings', 'Settings'), [toggleWindow]);
 
-    const openBrowser = () => openWindow('browser', 'Internet Browser');
-    const toggleBrowser = () => toggleWindow('browser', 'Internet Browser');
+    const openBrowser = useCallback(() => openWindow('browser', 'Internet Browser'), [openWindow]);
+    const toggleBrowser = useCallback(() => toggleWindow('browser', 'Internet Browser'), [toggleWindow]);
 
-    const openMail = () => openWindow('mail', 'Mail');
-    const toggleMail = () => toggleWindow('mail', 'Mail');
+    const openMail = useCallback(() => openWindow('mail', 'Mail'), [openWindow]);
+    const toggleMail = useCallback(() => toggleWindow('mail', 'Mail'), [toggleWindow]);
 
-    const openMinesweeper = () => openWindow('minesweeper', 'Minesweeper');
-    const toggleMinesweeper = () => toggleWindow('minesweeper', 'Minesweeper');
+    const openMinesweeper = useCallback(() => openWindow('minesweeper', 'Minesweeper'), [openWindow]);
+    const toggleMinesweeper = useCallback(() => toggleWindow('minesweeper', 'Minesweeper'), [toggleWindow]);
 
-    const openSudoku = () => openWindow('sudoku', 'Sudoku');
-    const toggleSudoku = () => toggleWindow('sudoku', 'Sudoku');
+    const openSudoku = useCallback(() => openWindow('sudoku', 'Sudoku'), [openWindow]);
+    const toggleSudoku = useCallback(() => toggleWindow('sudoku', 'Sudoku'), [toggleWindow]);
 
-    const openHtop = () => openWindow('htop', 'htop - interactive process viewer');
-    const toggleHtop = () => toggleWindow('htop', 'htop - interactive process viewer');
+    const openHtop = useCallback(() => openWindow('htop', 'htop - interactive process viewer'), [openWindow]);
+    const toggleHtop = useCallback(() => toggleWindow('htop', 'htop - interactive process viewer'), [toggleWindow]);
 
-    const openAbout = () => openWindow('about', 'About System');
-    const toggleAbout = () => toggleWindow('about', 'About System');
+    const openAbout = useCallback(() => openWindow('about', 'About System'), [openWindow]);
+    const toggleAbout = useCallback(() => toggleWindow('about', 'About System'), [toggleWindow]);
 
-    const openExplorer = (params?: any) => openWindow('explorer', 'Files', params);
-    const toggleExplorer = () => toggleWindow('explorer', 'Files');
+    const openExplorer = useCallback((params?: any) => openWindow('explorer', 'Files', params), [openWindow]);
+    const toggleExplorer = useCallback(() => toggleWindow('explorer', 'Files'), [toggleWindow]);
 
-    const openProjects = () => openWindow('projects', 'GitHub Projects');
-    const toggleProjects = () => toggleWindow('projects', 'GitHub Projects');
+    const openProjects = useCallback(() => openWindow('projects', 'GitHub Projects'), [openWindow]);
+    const toggleProjects = useCallback(() => toggleWindow('projects', 'GitHub Projects'), [toggleWindow]);
 
-    const openEditor = (title: string, params?: any) => openWindow('editor', title, params);
-    const toggleEditor = (title: string) => toggleWindow('editor', title);
+    const openEditor = useCallback((title: string, params?: any) => openWindow('editor', title, params), [openWindow]);
+    const toggleEditor = useCallback((title: string) => toggleWindow('editor', title), [toggleWindow]);
 
     return {
         openWindow,
