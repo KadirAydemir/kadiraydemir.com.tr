@@ -19,13 +19,22 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
     const { t } = useTranslation();
 
     const handleNavigation = (newUrl: string) => {
-        // Simple logic: if navigation is attempted to a different domain or unknown address, show error
-        // For this portfolio, we only "cache" the LinkedIn profile
-        if (newUrl !== defaultUrl && !newUrl.includes('linkedin.com/in/kadir-aydemir')) {
+        // Sentinel Security Fix: Parse URL to prevent Open Redirect / SSRF
+        try {
+            const urlObj = new URL(newUrl);
+            const isLinkedIn = urlObj.hostname === 'www.linkedin.com' || urlObj.hostname === 'linkedin.com';
+            // Allow exact path match or sub-paths for the profile
+            const isProfile = urlObj.pathname.startsWith('/in/kadir-aydemir');
+
+            if (newUrl === defaultUrl || (isLinkedIn && isProfile)) {
+                setIsError(false);
+                setUrl(newUrl);
+            } else {
+                setIsError(true);
+            }
+        } catch (e) {
+            // Invalid URL format
             setIsError(true);
-        } else {
-            setIsError(false);
-            setUrl(newUrl);
         }
     };
 
