@@ -18,7 +18,7 @@ const initialMockFileSystem: FileSystemItem = {
             modified: '2026-02-04',
             isSystem: true,
             children: [
-                { id: 'cv-pdf', name: 'Kadir_CV.pdf', type: 'file', extension: 'pdf', size: '245 KB', modified: '2026-01-15', isSystem: true },
+                { id: 'cv-pdf', name: 'CV.pdf', type: 'file', extension: 'pdf', size: '245 KB', modified: '2026-01-15', isSystem: true },
                 { id: 'projects', name: 'Projects', type: 'folder', modified: '2026-02-04', isSystem: true, children: [] },
             ]
         },

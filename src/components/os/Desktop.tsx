@@ -247,9 +247,10 @@ export const Desktop = () => {
 
             {/* System / Canonical Icons - Always visible regardless of localStorage */}
             <DesktopIcon
-                item={{ id: 'cv-pdf', name: 'Kadir_CV.pdf', type: 'file', extension: 'pdf', modified: '', isSystem: true }}
+                item={{ id: 'cv-pdf', name: 'CV.pdf', type: 'file', extension: 'pdf', modified: '', isSystem: true }}
                 onClick={openCV}
-                onContextMenu={(e) => handleContextMenu(e, { id: 'cv-pdf', name: 'Kadir_CV.pdf', type: 'file', extension: 'pdf', modified: '', isSystem: true })}
+                onContextMenu={(e) => handleContextMenu(e, { id: 'cv-pdf', name: 'CV.pdf', type: 'file', extension: 'pdf', modified: '', isSystem: true })}
+
                 isRenaming={renamingId === 'cv-pdf'}
                 renameValue={renameValue}
                 onRenameChange={setRenameValue}
