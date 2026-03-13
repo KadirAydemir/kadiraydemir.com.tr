@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RotateCcw, Flag, Trophy, Bomb } from 'lucide-react';
 
@@ -35,6 +35,65 @@ const NUMBER_COLORS = [
     'text-gray-800',
     'text-gray-900',
 ];
+
+interface MinesweeperGridProps {
+    grid: Cell[][];
+    config: DifficultyConfig;
+    difficulty: Difficulty;
+    cellSize: string;
+    onLeftClick: (row: number, col: number) => void;
+    onRightClick: (e: React.MouseEvent, row: number, col: number) => void;
+}
+
+// Memoized grid component to prevent unnecessary re-renders when the parent timer updates.
+// The grid only needs to update when cell state changes, not on every second tick.
+const MinesweeperGrid = memo(({ grid, config, difficulty, cellSize, onLeftClick, onRightClick }: MinesweeperGridProps) => {
+    return (
+        <div
+            className="grid gap-[1px] bg-gray-400 border-4 border-gray-600"
+            style={{
+                gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`,
+            }}
+        >
+            {grid.map((row, rowIndex) =>
+                row.map((cell, colIndex) => (
+                    <button
+                        key={`${rowIndex}-${colIndex}`}
+                        onClick={() => onLeftClick(rowIndex, colIndex)}
+                        onContextMenu={(e) => onRightClick(e, rowIndex, colIndex)}
+                        className={`
+                            ${cellSize}
+                            flex items-center justify-center font-bold
+                            transition-all
+                            ${cell.state === 'hidden'
+                                ? 'bg-gray-500 hover:bg-gray-400 shadow-inner'
+                                : cell.state === 'flagged'
+                                    ? 'bg-gray-500'
+                                    : cell.isMine
+                                        ? 'bg-red-500'
+                                        : 'bg-gray-200'
+                            }
+                        `}
+                    >
+                        {cell.state === 'flagged' && (
+                            <Flag className="text-ubuntu-orange" size={difficulty === 'hard' ? 12 : 16} />
+                        )}
+                        {cell.state === 'revealed' && cell.isMine && (
+                            <Bomb className="text-white" size={difficulty === 'hard' ? 12 : 16} />
+                        )}
+                        {cell.state === 'revealed' && !cell.isMine && cell.neighborMines > 0 && (
+                            <span className={NUMBER_COLORS[cell.neighborMines]}>
+                                {cell.neighborMines}
+                            </span>
+                        )}
+                    </button>
+                ))
+            )}
+        </div>
+    );
+});
+
+MinesweeperGrid.displayName = 'MinesweeperGrid';
 
 export const MinesweeperGame = () => {
     const [difficulty, setDifficulty] = useState<Difficulty>('easy');
@@ -306,47 +365,14 @@ export const MinesweeperGame = () => {
 
                 {/* Game Grid */}
                 <div className="relative bg-white p-3 rounded-lg shadow-2xl">
-                    <div
-                        className="grid gap-[1px] bg-gray-400 border-4 border-gray-600"
-                        style={{
-                            gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`,
-                        }}
-                    >
-                        {grid.map((row, rowIndex) =>
-                            row.map((cell, colIndex) => (
-                                <button
-                                    key={`${rowIndex}-${colIndex}`}
-                                    onClick={() => handleLeftClick(rowIndex, colIndex)}
-                                    onContextMenu={(e) => handleRightClick(e, rowIndex, colIndex)}
-                                    className={`
-                                    ${cellSize}
-                                    flex items-center justify-center font-bold
-                                    transition-all
-                                    ${cell.state === 'hidden'
-                                            ? 'bg-gray-500 hover:bg-gray-400 shadow-inner'
-                                            : cell.state === 'flagged'
-                                                ? 'bg-gray-500'
-                                                : cell.isMine
-                                                    ? 'bg-red-500'
-                                                    : 'bg-gray-200'
-                                        }
-                                `}
-                                >
-                                    {cell.state === 'flagged' && (
-                                        <Flag className="text-ubuntu-orange" size={difficulty === 'hard' ? 12 : 16} />
-                                    )}
-                                    {cell.state === 'revealed' && cell.isMine && (
-                                        <Bomb className="text-white" size={difficulty === 'hard' ? 12 : 16} />
-                                    )}
-                                    {cell.state === 'revealed' && !cell.isMine && cell.neighborMines > 0 && (
-                                        <span className={NUMBER_COLORS[cell.neighborMines]}>
-                                            {cell.neighborMines}
-                                        </span>
-                                    )}
-                                </button>
-                            ))
-                        )}
-                    </div>
+                    <MinesweeperGrid
+                        grid={grid}
+                        config={config}
+                        difficulty={difficulty}
+                        cellSize={cellSize}
+                        onLeftClick={handleLeftClick}
+                        onRightClick={handleRightClick}
+                    />
 
                     {/* Game Over Overlay */}
                     {(gameStatus === 'won' || gameStatus === 'lost') && (
