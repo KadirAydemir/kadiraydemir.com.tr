@@ -66,7 +66,7 @@ export const MinesweeperGame = () => {
     // Place mines avoiding first click position
     const placeMines = useCallback((grid: Cell[][], firstRow: number, firstCol: number) => {
         let minesPlaced = 0;
-        const newGrid = grid;
+        const newGrid = grid.map(r => r.map(c => ({ ...c })));
 
         while (minesPlaced < config.mines) {
             const row = Math.floor(Math.random() * config.rows);
@@ -121,7 +121,7 @@ export const MinesweeperGame = () => {
             return grid;
         }
 
-        const newGrid = grid;
+        const newGrid = grid.map(r => r.map(c => ({ ...c })));
         const stack = [[row, col]];
 
         while (stack.length > 0) {

@@ -54,17 +54,19 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
         fetchRepos();
     }, []);
 
-    const [history, setHistory] = useState<string[][]>([['home']]);
-    const [historyIndex, setHistoryIndex] = useState(0);
+    const [navHistory, setNavHistory] = useState<{ history: string[][], index: number }>({ history: [['home']], index: 0 });
+    const history = navHistory.history;
+    const historyIndex = navHistory.index;
 
     const navigateTo = useCallback((path: string[]) => {
         setCurrentPath(path);
         setSelectedItem(null);
-        const newHistory = history.slice(0, historyIndex + 1);
-        newHistory.push(path);
-        setHistory(newHistory);
-        setHistoryIndex(newHistory.length - 1);
-    }, [history, historyIndex]);
+        setNavHistory(({ history, index }) => {
+            const newHistory = history.slice(0, index + 1);
+            newHistory.push(path);
+            return { history: newHistory, index: newHistory.length - 1 };
+        });
+    }, []);
 
     const getCurrentFolder = (): FileSystemItem | null => {
         // Special case for projects folder - check the full path
@@ -96,19 +98,21 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
     const folderItems = currentFolder?.children || [];
 
     const goBack = () => {
-        if (historyIndex > 0) {
-            setHistoryIndex(historyIndex - 1);
-            setCurrentPath(history[historyIndex - 1]);
+        setNavHistory(prev => {
+            if (prev.index <= 0) return prev;
+            setCurrentPath(prev.history[prev.index - 1]);
             setSelectedItem(null);
-        }
+            return { history: prev.history, index: prev.index - 1 };
+        });
     };
 
     const goForward = () => {
-        if (historyIndex < history.length - 1) {
-            setHistoryIndex(historyIndex + 1);
-            setCurrentPath(history[historyIndex + 1]);
+        setNavHistory(prev => {
+            if (prev.index >= prev.history.length - 1) return prev;
+            setCurrentPath(prev.history[prev.index + 1]);
             setSelectedItem(null);
-        }
+            return { history: prev.history, index: prev.index + 1 };
+        });
     };
 
     const handleRenameSubmit = async (id: string) => {
