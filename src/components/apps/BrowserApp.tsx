@@ -18,10 +18,29 @@ export const BrowserApp: React.FC<BrowserAppProps> = ({
     const [isError, setIsError] = useState(false);
     const { t } = useTranslation();
 
+    const isValidUrl = (testUrl: string) => {
+        try {
+            // Allow if it matches the default URL exactly
+            if (testUrl === defaultUrl) return true;
+
+            const urlObj = new URL(testUrl);
+
+            // Allow LinkedIn profile paths
+            // We check for valid linkedin domains and the specific path prefix
+            return (
+                (urlObj.hostname === 'linkedin.com' ||
+                    urlObj.hostname === 'www.linkedin.com' ||
+                    urlObj.hostname === 'tr.linkedin.com') &&
+                urlObj.pathname.startsWith('/in/kadir-aydemir')
+            );
+        } catch {
+            return false;
+        }
+    };
+
     const handleNavigation = (newUrl: string) => {
-        // Simple logic: if navigation is attempted to a different domain or unknown address, show error
-        // For this portfolio, we only "cache" the LinkedIn profile
-        if (newUrl !== defaultUrl && !newUrl.includes('linkedin.com/in/kadir-aydemir')) {
+        // Secure validation using URL API instead of simple string matching
+        if (!isValidUrl(newUrl)) {
             setIsError(true);
         } else {
             setIsError(false);
