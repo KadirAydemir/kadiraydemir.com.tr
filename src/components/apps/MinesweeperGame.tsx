@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RotateCcw, Flag, Trophy, Bomb } from 'lucide-react';
+import { MinesweeperGrid } from './MinesweeperGrid';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
 type CellState = 'hidden' | 'revealed' | 'flagged';
@@ -23,18 +24,6 @@ const DIFFICULTIES: Record<Difficulty, DifficultyConfig> = {
     medium: { rows: 16, cols: 16, mines: 40 },
     hard: { rows: 16, cols: 30, mines: 99 },
 };
-
-const NUMBER_COLORS = [
-    '',
-    'text-blue-600',
-    'text-green-600',
-    'text-red-600',
-    'text-purple-600',
-    'text-yellow-700',
-    'text-pink-600',
-    'text-gray-800',
-    'text-gray-900',
-];
 
 export const MinesweeperGame = () => {
     const [difficulty, setDifficulty] = useState<Difficulty>('easy');
@@ -257,8 +246,6 @@ export const MinesweeperGame = () => {
         resetGame();
     }, [difficulty, resetGame]);
 
-    const cellSize = difficulty === 'hard' ? 'w-5 h-5 text-xs' : 'w-7 h-7 text-sm';
-
     return (
         <div className="h-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-auto">
             <div className="flex flex-col items-center justify-center min-h-full p-4">
@@ -306,47 +293,13 @@ export const MinesweeperGame = () => {
 
                 {/* Game Grid */}
                 <div className="relative bg-white p-3 rounded-lg shadow-2xl">
-                    <div
-                        className="grid gap-[1px] bg-gray-400 border-4 border-gray-600"
-                        style={{
-                            gridTemplateColumns: `repeat(${config.cols}, minmax(0, 1fr))`,
-                        }}
-                    >
-                        {grid.map((row, rowIndex) =>
-                            row.map((cell, colIndex) => (
-                                <button
-                                    key={`${rowIndex}-${colIndex}`}
-                                    onClick={() => handleLeftClick(rowIndex, colIndex)}
-                                    onContextMenu={(e) => handleRightClick(e, rowIndex, colIndex)}
-                                    className={`
-                                    ${cellSize}
-                                    flex items-center justify-center font-bold
-                                    transition-all
-                                    ${cell.state === 'hidden'
-                                            ? 'bg-gray-500 hover:bg-gray-400 shadow-inner'
-                                            : cell.state === 'flagged'
-                                                ? 'bg-gray-500'
-                                                : cell.isMine
-                                                    ? 'bg-red-500'
-                                                    : 'bg-gray-200'
-                                        }
-                                `}
-                                >
-                                    {cell.state === 'flagged' && (
-                                        <Flag className="text-ubuntu-orange" size={difficulty === 'hard' ? 12 : 16} />
-                                    )}
-                                    {cell.state === 'revealed' && cell.isMine && (
-                                        <Bomb className="text-white" size={difficulty === 'hard' ? 12 : 16} />
-                                    )}
-                                    {cell.state === 'revealed' && !cell.isMine && cell.neighborMines > 0 && (
-                                        <span className={NUMBER_COLORS[cell.neighborMines]}>
-                                            {cell.neighborMines}
-                                        </span>
-                                    )}
-                                </button>
-                            ))
-                        )}
-                    </div>
+                    <MinesweeperGrid
+                        grid={grid}
+                        difficulty={difficulty}
+                        config={config}
+                        onLeftClick={handleLeftClick}
+                        onRightClick={handleRightClick}
+                    />
 
                     {/* Game Over Overlay */}
                     {(gameStatus === 'won' || gameStatus === 'lost') && (
