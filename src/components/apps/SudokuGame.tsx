@@ -24,6 +24,49 @@ const DIFFICULTIES: Record<Difficulty, number> = {
     expert: 28,
 };
 
+interface SudokuCellProps {
+    cell: Cell;
+    rowIndex: number;
+    colIndex: number;
+    isSelected: boolean;
+    isHighlighted: boolean;
+    isSameNumber: boolean;
+    onSelect: (row: number, col: number) => void;
+}
+
+const SudokuCell = memo(({ cell, rowIndex, colIndex, isSelected, isHighlighted, isSameNumber, onSelect }: SudokuCellProps) => {
+    return (
+        <button
+            onClick={() => onSelect(rowIndex, colIndex)}
+            className={`
+                w-14 h-14 flex items-center justify-center relative
+                border border-gray-300 font-bold text-lg
+                transition-colors
+                ${(colIndex + 1) % BOX_COLS === 0 && colIndex !== GRID_SIZE - 1 ? 'border-r-2 border-r-gray-800' : ''}
+                ${(rowIndex + 1) % BOX_ROWS === 0 && rowIndex !== GRID_SIZE - 1 ? 'border-b-2 border-b-gray-800' : ''}
+                ${isSelected ? 'bg-ubuntu-orange/30 ring-2 ring-ubuntu-orange' : ''}
+                ${isHighlighted && !isSelected ? 'bg-blue-100' : ''}
+                ${isSameNumber && !isSelected ? 'bg-blue-200' : ''}
+                ${!isSelected && !isHighlighted && !isSameNumber ? 'bg-white hover:bg-gray-100' : ''}
+                ${cell.isFixed ? 'text-gray-900' : 'text-ubuntu-orange'}
+                ${cell.isError ? 'bg-red-100 text-red-600' : ''}
+            `}
+        >
+            {cell.value !== null ? (
+                cell.value
+            ) : (
+                <div className="grid grid-cols-3 gap-0 text-[10px] text-gray-400 absolute inset-0 p-1">
+                    {[1, 2, 3, 4, 5, 6].map(num => (
+                        <div key={num} className="flex items-center justify-center">
+                            {cell.notes.has(num) ? num : ''}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </button>
+    );
+});
+
 interface SudokuBoardProps {
     grid: Cell[][];
     selectedCell: [number, number] | null;
@@ -36,45 +79,26 @@ const SudokuBoard = memo(({ grid, selectedCell, onCellSelect }: SudokuBoardProps
             {grid.map((row, rowIndex) =>
                 row.map((cell, colIndex) => {
                     const isSelected = selectedCell?.[0] === rowIndex && selectedCell?.[1] === colIndex;
-                    const isHighlighted = selectedCell && (
+                    const isHighlighted = !!selectedCell && (
                         selectedCell[0] === rowIndex ||
                         selectedCell[1] === colIndex ||
                         (Math.floor(selectedCell[0] / BOX_ROWS) === Math.floor(rowIndex / BOX_ROWS) &&
                             Math.floor(selectedCell[1] / BOX_COLS) === Math.floor(colIndex / BOX_COLS))
                     );
-                    const isSameNumber = cell.value !== null && selectedCell &&
+                    const isSameNumber = cell.value !== null && !!selectedCell &&
                         grid[selectedCell[0]][selectedCell[1]].value === cell.value;
 
                     return (
-                        <button
+                        <SudokuCell
                             key={`${rowIndex}-${colIndex}`}
-                            onClick={() => onCellSelect(rowIndex, colIndex)}
-                            className={`
-                                w-14 h-14 flex items-center justify-center relative
-                                border border-gray-300 font-bold text-lg
-                                transition-colors
-                                ${(colIndex + 1) % BOX_COLS === 0 && colIndex !== GRID_SIZE - 1 ? 'border-r-2 border-r-gray-800' : ''}
-                                ${(rowIndex + 1) % BOX_ROWS === 0 && rowIndex !== GRID_SIZE - 1 ? 'border-b-2 border-b-gray-800' : ''}
-                                ${isSelected ? 'bg-ubuntu-orange/30 ring-2 ring-ubuntu-orange' : ''}
-                                ${isHighlighted && !isSelected ? 'bg-blue-100' : ''}
-                                ${isSameNumber && !isSelected ? 'bg-blue-200' : ''}
-                                ${!isSelected && !isHighlighted && !isSameNumber ? 'bg-white hover:bg-gray-100' : ''}
-                                ${cell.isFixed ? 'text-gray-900' : 'text-ubuntu-orange'}
-                                ${cell.isError ? 'bg-red-100 text-red-600' : ''}
-                            `}
-                        >
-                            {cell.value !== null ? (
-                                cell.value
-                            ) : (
-                                <div className="grid grid-cols-3 gap-0 text-[10px] text-gray-400 absolute inset-0 p-1">
-                                    {[1, 2, 3, 4, 5, 6].map(num => (
-                                        <div key={num} className="flex items-center justify-center">
-                                            {cell.notes.has(num) ? num : ''}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </button>
+                            cell={cell}
+                            rowIndex={rowIndex}
+                            colIndex={colIndex}
+                            isSelected={isSelected}
+                            isHighlighted={isHighlighted}
+                            isSameNumber={isSameNumber}
+                            onSelect={onCellSelect}
+                        />
                     );
                 })
             )}
