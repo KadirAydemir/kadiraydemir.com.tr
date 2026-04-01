@@ -66,7 +66,7 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
         setHistoryIndex(newHistory.length - 1);
     }, [history, historyIndex]);
 
-    const getCurrentFolder = (): FileSystemItem | null => {
+    const currentFolder = useMemo(() => {
         // Special case for projects folder - check the full path
         if (currentPath.join('/') === 'home/desktop/projects') {
             return {
@@ -90,9 +90,7 @@ export const FileExplorerApp = ({ initialPath }: FileExplorerProps) => {
             }
         }
         return current;
-    };
-
-    const currentFolder = getCurrentFolder();
+    }, [currentPath, fileSystem, githubFiles]);
     const folderItems = currentFolder?.children || [];
 
     const goBack = () => {
