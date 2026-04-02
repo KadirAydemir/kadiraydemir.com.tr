@@ -404,10 +404,19 @@ export const useOSStore = create<OSState>((set, get) => ({
                 };
             }
             if (node.children) {
-                return {
-                    ...node,
-                    children: node.children.map(updateTree)
-                };
+                let hasChanges = false;
+                const newChildren = node.children.map(child => {
+                    const updated = updateTree(child);
+                    if (updated !== child) hasChanges = true;
+                    return updated;
+                });
+
+                if (hasChanges) {
+                    return {
+                        ...node,
+                        children: newChildren
+                    };
+                }
             }
             return node;
         };
@@ -462,12 +471,22 @@ export const useOSStore = create<OSState>((set, get) => ({
             // Permanent delete if already in trash
             const removeFromTree = (node: FileSystemItem): FileSystemItem => {
                 if (node.children) {
-                    return {
-                        ...node,
-                        children: node.children
-                            .filter(child => child.id !== id)
-                            .map(removeFromTree)
-                    };
+                    const filtered = node.children.filter(child => child.id !== id);
+                    const removed = filtered.length !== node.children.length;
+
+                    let hasChanges = false;
+                    const newChildren = filtered.map(child => {
+                        const updated = removeFromTree(child);
+                        if (updated !== child) hasChanges = true;
+                        return updated;
+                    });
+
+                    if (removed || hasChanges) {
+                        return {
+                            ...node,
+                            children: newChildren
+                        };
+                    }
                 }
                 return node;
             };
@@ -493,10 +512,19 @@ export const useOSStore = create<OSState>((set, get) => ({
                 }
                 // Recurse
                 if (node.children) {
-                    return {
-                        ...node,
-                        children: node.children.map(moveInTree)
-                    };
+                    let hasChanges = false;
+                    const newChildren = node.children.map(child => {
+                        const updated = moveInTree(child);
+                        if (updated !== child) hasChanges = true;
+                        return updated;
+                    });
+
+                    if (hasChanges) {
+                        return {
+                            ...node,
+                            children: newChildren
+                        };
+                    }
                 }
                 return node;
             };
@@ -545,10 +573,19 @@ export const useOSStore = create<OSState>((set, get) => ({
             }
             // Recurse
             if (node.children) {
-                return {
-                    ...node,
-                    children: node.children.map(restoreInTree)
-                };
+                let hasChanges = false;
+                const newChildren = node.children.map(child => {
+                    const updated = restoreInTree(child);
+                    if (updated !== child) hasChanges = true;
+                    return updated;
+                });
+
+                if (hasChanges) {
+                    return {
+                        ...node,
+                        children: newChildren
+                    };
+                }
             }
             return node;
         };
@@ -569,10 +606,19 @@ export const useOSStore = create<OSState>((set, get) => ({
                 };
             }
             if (node.children) {
-                return {
-                    ...node,
-                    children: node.children.map(emptyTrashInTree)
-                };
+                let hasChanges = false;
+                const newChildren = node.children.map(child => {
+                    const updated = emptyTrashInTree(child);
+                    if (updated !== child) hasChanges = true;
+                    return updated;
+                });
+
+                if (hasChanges) {
+                    return {
+                        ...node,
+                        children: newChildren
+                    };
+                }
             }
             return node;
         };
@@ -594,10 +640,19 @@ export const useOSStore = create<OSState>((set, get) => ({
                 };
             }
             if (node.children) {
-                return {
-                    ...node,
-                    children: node.children.map(updateTree)
-                };
+                let hasChanges = false;
+                const newChildren = node.children.map(child => {
+                    const updated = updateTree(child);
+                    if (updated !== child) hasChanges = true;
+                    return updated;
+                });
+
+                if (hasChanges) {
+                    return {
+                        ...node,
+                        children: newChildren
+                    };
+                }
             }
             return node;
         };
@@ -662,10 +717,19 @@ export const useOSStore = create<OSState>((set, get) => ({
                 };
             }
             if (node.children) {
-                return {
-                    ...node,
-                    children: node.children.map(updateTree)
-                };
+                let hasChanges = false;
+                const newChildren = node.children.map(child => {
+                    const updated = updateTree(child);
+                    if (updated !== child) hasChanges = true;
+                    return updated;
+                });
+
+                if (hasChanges) {
+                    return {
+                        ...node,
+                        children: newChildren
+                    };
+                }
             }
             return node;
         };
